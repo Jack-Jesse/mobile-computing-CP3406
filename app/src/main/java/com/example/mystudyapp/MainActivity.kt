@@ -6,19 +6,20 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.ArrowBack
@@ -42,6 +43,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.TextField
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -50,24 +52,29 @@ import com.example.mystudyapp.ui.theme.MyStudyAppTheme
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
-
-
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.draw.shadow
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Surface
+import com.example.mystudyapp.ui.theme.mode_light_primary
+import androidx.compose.ui.res.painterResource
+import com.example.mystudyapp.ui.theme.mode_light_secondary
+import com.example.mystudyapp.ui.theme.mode_light_tertiary
 
 class MainActivity : ComponentActivity() {
-    private val darkTheme = mutableStateOf(false)
+//    private val darkTheme = mutableStateOf(false)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MyStudyAppTheme(darkTheme = darkTheme.value) {
+            MyStudyAppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Column(
                         modifier = Modifier
@@ -105,17 +112,23 @@ class MainActivity : ComponentActivity() {
                 IconButton(onClick = { /* ToDo */ }) {
                     Icon(
                         imageVector = Icons.Rounded.Menu,
-                        contentDescription = "Menu"
+                        contentDescription = "Menu",
+                        tint = mode_light_tertiary
                     )
                 }
             },
             actions = {
                 IconButton(onClick = { /* Handle profile click */ }) {
-                    Icon(Icons.Rounded.Person, contentDescription = "Profile")
+                    Icon(
+                        Icons.Rounded.Person,
+                        contentDescription = "Profile",
+                        tint = mode_light_tertiary
+                    )
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = Color(87, 143, 202)
+                containerColor = mode_light_primary,
+                titleContentColor = mode_light_tertiary,
             )
         )
     }
@@ -134,12 +147,16 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun MyModalDatePicker() {
         Card(
-            modifier = Modifier.padding(16.dp).fillMaxWidth(),
-            border = BorderStroke(2.dp, Color.Gray),
-            colors = CardDefaults.cardColors(Color(54, 116, 181))
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+//            border = BorderStroke(2.dp, Color.Gray),
+            colors = CardDefaults.cardColors(mode_light_secondary)
         ) {
             Column(
-                modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(),
                 horizontalAlignment =  Alignment.CenterHorizontally,
             ) {
                 Text("Modal Date Picker")
@@ -147,7 +164,8 @@ class MainActivity : ComponentActivity() {
                     imageVector = Icons.Rounded.DateRange,
                     contentDescription = "Calender"
                 )
-                Text("📅DATE: 12/12/2025\n🕐TIME: 12:00")
+                Text("📅DATE: 12/12/2025\n🕐TIME: 12:00",
+                    color = MaterialTheme.colorScheme.onTertiary)
             }
         }
     }
@@ -166,12 +184,16 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun MyUpcomingCard() {
         Card(
-            modifier = Modifier.padding(16.dp).fillMaxWidth(),
-            border = BorderStroke(2.dp, Color.Gray),
-            colors = CardDefaults.cardColors(Color(245, 240, 205))
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+//            border = BorderStroke(2.dp, Color.Gray),
+            colors = CardDefaults.cardColors(MaterialTheme.colorScheme.primaryContainer)
         ) {
             Column(
-                modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(),
                 horizontalAlignment =  Alignment.CenterHorizontally,
             ) {
                 Text("Study Session")
@@ -186,17 +208,22 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun MyBottomAppBar() {
-        BottomAppBar {
+        BottomAppBar(
+            containerColor = mode_light_primary,
+            contentColor = mode_light_tertiary
+        ) {
             IconButton(onClick = { /* doSomething() */ }, modifier = Modifier.weight(1f)) {
                 Icon(Icons.Rounded.Home, contentDescription = "Home")
             }
             IconButton(
                 onClick = { /* doSomething() */ },
                 modifier = Modifier
-                    .border(BorderStroke(2.dp, Color.Transparent), CircleShape)
-                    .padding(0.dp)
-                    .background(Color(110, 194, 7), CircleShape) // Pink background
+//                    .shadow(elevation = 4.dp, shape = CircleShape, clip = false) // Drop shadow
+//                    .padding(0.dp)
+                    .background(color = Color(255, 87, 34, 255), CircleShape) // Slightly lighter for highlight
                     .aspectRatio(1f)
+                    .border(BorderStroke(3.dp, Color(244, 67, 54, 255)), CircleShape) // Darker border for 3D effect
+                    .padding(bottom = 4.dp)
             ) {
                 Icon(Icons.Rounded.Add,
                     contentDescription = "Add",
@@ -211,7 +238,10 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun MySecondaryBottomAppBar() {
-        BottomAppBar {
+        BottomAppBar(
+            containerColor = mode_light_primary,
+            contentColor = mode_light_tertiary
+        ) {
             IconButton(onClick = { /* doSomething() */ }, modifier = Modifier.weight(1f)) {
                 Icon(Icons.Rounded.ArrowBack, contentDescription = "Back")
             }
@@ -285,6 +315,7 @@ class MainActivity : ComponentActivity() {
 fun ProfileScreen() {
     Column(
         modifier = Modifier
+            .background(color = colorResource(id = R.color.white))
             .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -336,6 +367,7 @@ fun SettingsScreen(darkTheme: MutableState<Boolean>) {
 
     Column(
         modifier = Modifier
+            .background(color = colorResource(id = R.color.white))
             .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -373,11 +405,17 @@ fun SettingsScreen(darkTheme: MutableState<Boolean>) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MediaUploadPage() {
-    Scaffold(
-        topBar = { MainActivity().MyTopAppBar() }
-    ) { innerPadding ->
+    MyStudyAppTheme(darkTheme = false) { // Apply light theme here
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            Scaffold(
+                topBar = { MainActivity().MyTopAppBar() }
+            ) { innerPadding ->
         Column(
             modifier = Modifier
+                .background(color = colorResource(id = R.color.white))
                 .padding(innerPadding)
                 .fillMaxSize()
                 .padding(16.dp),
@@ -393,34 +431,84 @@ fun MediaUploadPage() {
             // PDF Upload Button
             Button(
                 onClick = { /* Handle PDF upload */ },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Transparent,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
+                ),
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(horizontal = 1.dp)
                     .padding(vertical = 8.dp)
+                    .shadow(elevation = 4.dp, shape = RoundedCornerShape(25.dp)),
+                shape = RoundedCornerShape(12.dp)
             ) {
-//            Icon(Icons.Filled.PictureAsPdf, contentDescription = "Upload PDF", modifier = Modifier.padding(end = 8.dp))
-                Text("Upload PDF")
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.pdf),
+                        contentDescription = "Upload PDF",
+                        tint = Color.Unspecified,
+                        modifier = Modifier
+                            .padding(5.dp)
+                            .size(100.dp)
+                    )
+                    Text("Upload PDF")
+                }
             }
 
             // Audio Upload Button
             Button(
-                onClick = { /* Handle Audio upload */ },
+                onClick = { /* Handle PDF upload */ },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Transparent,
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                ),
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(horizontal = 1.dp)
                     .padding(vertical = 8.dp)
+                    .shadow(elevation = 4.dp, shape = RoundedCornerShape(25.dp)),
+                shape = RoundedCornerShape(12.dp)
             ) {
-//            Icon(Icons.Filled.Audiotrack, contentDescription = "Upload Audio", modifier = Modifier.padding(end = 8.dp))
-                Text("Upload Audio")
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.mp3),
+                        contentDescription = "Upload PDF",
+                        tint = Color.Unspecified,
+                        modifier = Modifier
+                            .padding(5.dp)
+                            .size(100.dp)
+                    )
+                    Text("Upload Audio")
+                }
             }
 
             // Video Upload Button
             Button(
-                onClick = { /* Handle Video upload */ },
+                onClick = { /* Handle PDF upload */ },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Transparent,
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                ),
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(horizontal = 1.dp)
                     .padding(vertical = 8.dp)
+                    .shadow(elevation = 4.dp, shape = RoundedCornerShape(25.dp)),
+                shape = RoundedCornerShape(12.dp)
             ) {
-//            Icon(Icons.Filled.Videocam, contentDescription = "Upload Video", modifier = Modifier.padding(end = 8.dp))
-                Text("Upload Video")
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.mp4),
+                        contentDescription = "Upload PDF",
+                        tint = Color.Unspecified,
+                        modifier = Modifier
+                            .padding(5.dp)
+                            .size(100.dp)
+                    )
+                    Text("Upload Audio")
+                }
+            }
+        }
             }
         }
     }
@@ -433,7 +521,7 @@ fun MediaUploadPagePreview() {
     MyStudyAppTheme {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
-            bottomBar = { MainActivity().MySecondaryBottomAppBar() } // Use the secondary bottom app bar
+            bottomBar = { MainActivity().MySecondaryBottomAppBar() }
         ) { innerPadding ->
             Column(modifier = Modifier.padding(innerPadding)) {
                 MediaUploadPage()
@@ -442,7 +530,7 @@ fun MediaUploadPagePreview() {
     }
 }
 
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
 @Composable
 fun MyHomeScreenPreview() {
@@ -453,6 +541,7 @@ fun MyHomeScreenPreview() {
         ) { innerPadding ->
             Column(
                 modifier = Modifier
+                    .background(color = colorResource(id = R.color.white))
                     .padding(innerPadding)
                     .fillMaxSize(),
 //                verticalArrangement = Arrangement.Center,
@@ -473,6 +562,7 @@ fun MySignInSectionPreview() {
         Scaffold {
             Column(
                 modifier = Modifier
+                    .background(color = colorResource(id = R.color.white))
                     .padding(it)
                     .fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
@@ -500,7 +590,9 @@ fun SettingsScreenPreview() {
             bottomBar = { MainActivity().MySecondaryBottomAppBar(
             ) }
         ) { innerPadding ->
-            Column(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
+            Column(modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()) {
                 SettingsScreen(darkTheme = darkTheme)
             }
 
@@ -511,13 +603,16 @@ fun SettingsScreenPreview() {
 @Preview(showBackground = true)
 @Composable
 fun ProfileScreenPreview() {
-    MyStudyAppTheme {
+    val darkTheme = remember { mutableStateOf(false) }
+    MyStudyAppTheme(darkTheme = darkTheme.value) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = { MainActivity().MyTopAppBar() },
             bottomBar = { MainActivity().MySecondaryBottomAppBar() }
         ) { innerPadding ->
-            Column(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
+            Column(modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()) {
                 ProfileScreen()
             }
         }
