@@ -43,12 +43,17 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DatePicker
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.mystudyapp.ui.theme.MyStudyAppTheme
+//import com.example.mystudyapp.ui.theme.MyStudyAppTheme
+import com.example.compose.AppTheme // Import your AppTheme
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextDecoration
@@ -61,11 +66,37 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.draw.shadow
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.Surface
-import com.example.mystudyapp.ui.theme.mode_light_primary
 import androidx.compose.ui.res.painterResource
-import com.example.mystudyapp.ui.theme.mode_light_secondary
-import com.example.mystudyapp.ui.theme.mode_light_tertiary
+import com.example.compose.errorContainerLight
+import com.example.compose.errorDark
+import com.example.compose.errorLight
+import com.example.compose.onErrorContainerDarkHighContrast
+import com.example.compose.onErrorDark
+import com.example.compose.onErrorDarkHighContrast
+import com.example.compose.onErrorLight
+import com.example.compose.onPrimaryContainerDarkHighContrast
+import com.example.compose.onPrimaryContainerLight
+import com.example.compose.onPrimaryContainerLightHighContrast
+import com.example.compose.onPrimaryDark
+import com.example.compose.onPrimaryLight
+import com.example.compose.onPrimaryLightHighContrast
+import com.example.compose.onSecondaryLight
+import com.example.compose.onTertiaryDark
+import com.example.compose.onTertiaryLight
+import com.example.compose.primaryContainerLight
+import com.example.compose.primaryContainerLightHighContrast
+import com.example.compose.primaryLight
+import com.example.compose.primaryLightHighContrast
+import com.example.compose.primaryLightMediumContrast
+import com.example.compose.secondaryContainerDark
+import com.example.compose.secondaryContainerLight
+import com.example.compose.secondaryContainerLightHighContrast
+import com.example.compose.tertiaryLight
+import com.example.compose.tertiaryLightHighContrast
+import java.text.SimpleDateFormat
+import java.util.Date
 
 class MainActivity : ComponentActivity() {
 //    private val darkTheme = mutableStateOf(false)
@@ -74,7 +105,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MyStudyAppTheme {
+            AppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Column(
                         modifier = Modifier
@@ -113,7 +144,7 @@ class MainActivity : ComponentActivity() {
                     Icon(
                         imageVector = Icons.Rounded.Menu,
                         contentDescription = "Menu",
-                        tint = mode_light_tertiary
+                        tint = onPrimaryLight
                     )
                 }
             },
@@ -122,13 +153,13 @@ class MainActivity : ComponentActivity() {
                     Icon(
                         Icons.Rounded.Person,
                         contentDescription = "Profile",
-                        tint = mode_light_tertiary
+                        tint = onPrimaryLight
                     )
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = mode_light_primary,
-                titleContentColor = mode_light_tertiary,
+                containerColor = primaryLightHighContrast,
+                titleContentColor = onTertiaryLight,
             )
         )
     }
@@ -144,32 +175,59 @@ class MainActivity : ComponentActivity() {
         MyModalDatePicker()
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun MyModalDatePicker() {
-        Card(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-//            border = BorderStroke(2.dp, Color.Gray),
-            colors = CardDefaults.cardColors(mode_light_secondary)
-        ) {
-            Column(
+        var showDatePicker by remember { mutableStateOf(false) }
+        val datePickerState = rememberDatePickerState()
+        var selectedDate by remember { mutableStateOf<Long?>(null) }
+
+        Button(onClick = { showDatePicker = true }) {
+            Text("Set Date and Time")
+        }
+
+        if (showDatePicker) {
+            DatePickerDialog(
+                onDismissRequest = { showDatePicker = false },
+                confirmButton = {
+                    TextButton(onClick = {
+                        selectedDate = datePickerState.selectedDateMillis
+                        showDatePicker = false
+                    }) {
+                        Text("OK")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDatePicker = false }) {
+                        Text("Cancel")
+                    }
+                }
+            ) {
+                DatePicker(state = datePickerState)
+            }
+        }
+
+        if (selectedDate != null) {
+            Card(
                 modifier = Modifier
                     .padding(16.dp)
                     .fillMaxWidth(),
-                horizontalAlignment =  Alignment.CenterHorizontally,
+                colors = CardDefaults.cardColors(containerColor = primaryContainerLight)
             ) {
-                Text("Modal Date Picker")
-                Icon(
-                    imageVector = Icons.Rounded.DateRange,
-                    contentDescription = "Calender"
-                )
-                Text("📅DATE: 12/12/2025\n🕐TIME: 12:00",
-                    color = MaterialTheme.colorScheme.onTertiary)
+                Column(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    val formattedDate = SimpleDateFormat("dd/MM/yyyy").format(Date(selectedDate!!))
+                    Text("📅DATE: $formattedDate\n🕐TIME: Not Set", // Time part is not handled by DatePicker
+                        color = onPrimaryContainerLight
+                    )
+                }
             }
         }
     }
-
     @Composable
     fun MyUpcomingSection() {
         Column(
@@ -188,7 +246,7 @@ class MainActivity : ComponentActivity() {
                 .padding(16.dp)
                 .fillMaxWidth(),
 //            border = BorderStroke(2.dp, Color.Gray),
-            colors = CardDefaults.cardColors(MaterialTheme.colorScheme.primaryContainer)
+            colors = CardDefaults.cardColors(containerColor = primaryContainerLight)
         ) {
             Column(
                 modifier = Modifier
@@ -201,7 +259,8 @@ class MainActivity : ComponentActivity() {
                     imageVector = Icons.Rounded.DateRange,
                     contentDescription = "Calender"
                 )
-                Text("📅DATE: 12/12/2025\n🕐TIME: 12:00")
+                Text("📅DATE: 12/12/2025\n🕐TIME: 12:00",
+                    color = onPrimaryContainerLight)
             }
         }
     }
@@ -209,8 +268,8 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun MyBottomAppBar() {
         BottomAppBar(
-            containerColor = mode_light_primary,
-            contentColor = mode_light_tertiary
+            containerColor = primaryLightHighContrast,
+            contentColor = onPrimaryLightHighContrast
         ) {
             IconButton(onClick = { /* doSomething() */ }, modifier = Modifier.weight(1f)) {
                 Icon(Icons.Rounded.Home, contentDescription = "Home")
@@ -220,15 +279,17 @@ class MainActivity : ComponentActivity() {
                 modifier = Modifier
 //                    .shadow(elevation = 4.dp, shape = CircleShape, clip = false) // Drop shadow
 //                    .padding(0.dp)
-                    .background(color = Color(255, 87, 34, 255), CircleShape) // Slightly lighter for highlight
-                    .aspectRatio(1f)
-                    .border(BorderStroke(3.dp, Color(244, 67, 54, 255)), CircleShape) // Darker border for 3D effect
+                    .background(color = errorDark, CircleShape) // Slightly lighter for highlight
+                    .border(BorderStroke(3.dp, onErrorDarkHighContrast), CircleShape) // Darker border for 3D effect
+                    .aspectRatio(1f) // Ensure the button remains circular
                     .padding(bottom = 4.dp)
             ) {
                 Icon(Icons.Rounded.Add,
+                    tint = onErrorDark,
                     contentDescription = "Add",
                     modifier = Modifier.size(55.dp)
                 )
+
             }
             IconButton(onClick = { /* doSomething() */ }, modifier = Modifier.weight(1f)) {
                 Icon(Icons.Rounded.DateRange, contentDescription = "Calendar")
@@ -239,8 +300,8 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun MySecondaryBottomAppBar() {
         BottomAppBar(
-            containerColor = mode_light_primary,
-            contentColor = mode_light_tertiary
+            containerColor = primaryLightHighContrast,
+            contentColor = onPrimaryLightHighContrast
         ) {
             IconButton(onClick = { /* doSomething() */ }, modifier = Modifier.weight(1f)) {
                 Icon(Icons.Rounded.ArrowBack, contentDescription = "Back")
@@ -271,18 +332,35 @@ class MainActivity : ComponentActivity() {
             modifier = Modifier.padding(16.dp),
             horizontalAlignment =  Alignment.CenterHorizontally
         ) {
+            var email by remember { mutableStateOf("") }
+            var password by remember { mutableStateOf("") }
+
             TextField(
-                value = "",
-                onValueChange = {},
+                value = email,
+                onValueChange = { email = it },
                 label = { Text("Email") },
-                modifier = Modifier.padding(bottom = 8.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
+                shape = RoundedCornerShape(8.dp),
+                colors = TextFieldDefaults.colors(
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent
+                )
             )
 
             TextField(
-                value = "",
-                onValueChange = {},
+                value = password,
+                onValueChange = { password = it },
                 label = { Text("Password") },
-                modifier = Modifier.padding(bottom = 8.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp), // Increased padding for more space
+                shape = RoundedCornerShape(8.dp),
+                colors = TextFieldDefaults.colors(
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent
+                )
             )
 
             MySignInButton()
@@ -294,7 +372,12 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun MySignInButton() {
         Button(
-            onClick = { /* ToDo */ }
+            onClick = { /* ToDo */ },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = primaryContainerLightHighContrast,
+                contentColor = onPrimaryContainerLightHighContrast
+
+            )
         ) {
             Text("Sign In")
         }
@@ -343,7 +426,13 @@ fun ProfileScreen() {
 
         Spacer(modifier = Modifier.weight(1f)) // Pushes logout button to the bottom
 
-        Button(onClick = { /* Handle logout */ }) {
+        Button(
+            onClick = { /* Handle logout */ },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = errorLight, // Using red from your color.kt
+                contentColor = onErrorLight
+            )
+        ) {
             Text("Logout")
         }
     }
@@ -396,7 +485,14 @@ fun SettingsScreen(darkTheme: MutableState<Boolean>) {
             )
         }
         Spacer(modifier = Modifier.weight(1f)) // Pushes logout button to the bottom
-        Button(onClick = { /* Handle logout */ }) {
+        Button(
+            onClick = { /* Handle logout */ },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = errorLight,
+                contentColor = onErrorLight
+
+            )
+        ) {
             Text("Logout")
         }
     }
@@ -405,7 +501,7 @@ fun SettingsScreen(darkTheme: MutableState<Boolean>) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MediaUploadPage() {
-    MyStudyAppTheme(darkTheme = false) { // Apply light theme here
+    AppTheme (darkTheme = false) { // Apply light theme here
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
@@ -518,7 +614,7 @@ fun MediaUploadPage() {
 @Preview(showBackground = true)
 @Composable
 fun MediaUploadPagePreview() {
-    MyStudyAppTheme {
+    AppTheme  {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             bottomBar = { MainActivity().MySecondaryBottomAppBar() }
@@ -534,7 +630,7 @@ fun MediaUploadPagePreview() {
 @Preview(showBackground = true)
 @Composable
 fun MyHomeScreenPreview() {
-    MyStudyAppTheme {
+    AppTheme {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             bottomBar = { MainActivity().MyBottomAppBar() }
@@ -558,7 +654,7 @@ fun MyHomeScreenPreview() {
 @Preview(showBackground = true)
 @Composable
 fun MySignInSectionPreview() {
-    MyStudyAppTheme {
+    AppTheme {
         Scaffold {
             Column(
                 modifier = Modifier
@@ -583,7 +679,7 @@ fun MySignInSectionPreview() {
 @Composable
 fun SettingsScreenPreview() {
     val darkTheme = remember { mutableStateOf(false) }
-    MyStudyAppTheme(darkTheme = darkTheme.value) {
+    AppTheme(darkTheme = darkTheme.value) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = { MainActivity().MyTopAppBar() },
@@ -604,7 +700,7 @@ fun SettingsScreenPreview() {
 @Composable
 fun ProfileScreenPreview() {
     val darkTheme = remember { mutableStateOf(false) }
-    MyStudyAppTheme(darkTheme = darkTheme.value) {
+    AppTheme (darkTheme = darkTheme.value) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = { MainActivity().MyTopAppBar() },
