@@ -419,7 +419,9 @@ object Screen {
     fun MyUpcomingSection(db: StudyDatabase, containerColor: Color, textColor: Color) {
 //        val sessionsFlow = db.StudyDatabase().getAllSessions()
 //        val sessionsFlow = db.studySessionDao().getAllSessions().collectAsState(initial = emptyList())
-        val sessionsFlow = db.studyEventDao().getAll()
+//        val sessionsFlow = db.studyEventDao().getAllFlow().collectAsState(initial = emptyList())
+        val sessionsFlow = db.studyEventDao().getAllFlow()
+
         Column(
             modifier = Modifier.padding(16.dp),
             horizontalAlignment =  Alignment.CenterHorizontally

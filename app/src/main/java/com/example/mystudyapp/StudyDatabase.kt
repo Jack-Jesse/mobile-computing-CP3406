@@ -17,7 +17,7 @@ abstract class StudyDatabase : RoomDatabase() {
     abstract fun studyEventDao(): StudyEventDao
 }
 
-@Entity(tableName = "study_events") // Example table name
+@Entity(tableName = "study_db") // Example table name
 data class StudyEvent (
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val name: String
@@ -29,6 +29,8 @@ interface StudyEventDao {
     @Insert
     suspend fun insert(entity: StudyEvent)
 
-    @Query("SELECT * FROM study_events")
-    fun getAll(): List<StudyEvent>
+//    @Query("SELECT * FROM study_db")
+//    fun getAll(): List<StudyEvent>
+@Query("SELECT * FROM study_db")
+fun getAllFlow(): kotlinx.coroutines.flow.Flow<List<StudyEvent>>
 }
