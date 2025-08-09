@@ -2,6 +2,13 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+
+//    room
+    id("kotlin-kapt")
+
+//    alias(libs.plugins.kotlin.room)
+//    alias(libs.plugins.kotlin.parcelize)
+//    alias(libs.plugins.kotlin.kapt)
 }
 
 android {
@@ -43,4 +50,12 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.material3.android)
     implementation(libs.androidx.ui.text.google.fonts)
+
+    // Room Dependencies
+    val roomVersion = "2.6.1"
+
+    implementation("androidx.room:room-runtime:$roomVersion")
+    kapt("androidx.room:room-compiler:$roomVersion")
+    implementation("androidx.room:room-ktx:$roomVersion")
+
 }
