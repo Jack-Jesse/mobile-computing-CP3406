@@ -1,44 +1,37 @@
 package com.example.mystudyapp
 
 //import com.example.mystudyapp.ui.theme.MyStudyAppTheme
-import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.room.Room
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.DateRange
-import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.List
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Settings
-import androidx.compose.material.icons.rounded.Star
-import androidx.compose.material.icons.rounded.List
-import androidx.compose.material.icons.rounded.Person
-import androidx.compose.material.icons.rounded.Settings
-import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -46,10 +39,12 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -61,19 +56,19 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberDatePickerState
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextDecoration
@@ -82,7 +77,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.room.Room.databaseBuilder
 import com.example.compose.AppTheme
 import com.example.compose.errorContainerDark
 import com.example.compose.errorDark
@@ -92,46 +86,24 @@ import com.example.compose.onErrorContainerDark
 import com.example.compose.onErrorDarkHighContrast
 import com.example.compose.onErrorLight
 import com.example.compose.onPrimaryContainerDark
-import com.example.compose.onPrimaryContainerDarkHighContrast
-import com.example.compose.onPrimaryContainerLight
 import com.example.compose.onPrimaryContainerLightHighContrast
 import com.example.compose.onPrimaryDark
 import com.example.compose.onPrimaryLight
 import com.example.compose.onTertiaryDark
 import com.example.compose.onTertiaryLight
 import com.example.compose.primaryContainerDarkHighContrast
-import com.example.compose.AppTheme
-import com.example.compose.errorContainerDark
-import com.example.compose.errorDark
-import com.example.compose.errorLight
-import com.example.compose.onErrorDark
-import com.example.compose.onErrorContainerDark
-import com.example.compose.onErrorDarkHighContrast
-import com.example.compose.onErrorLight
-import com.example.compose.onPrimaryContainerDark
-import com.example.compose.onPrimaryContainerDarkHighContrast
-import com.example.compose.onPrimaryContainerLight
-import com.example.compose.onPrimaryContainerLightHighContrast
-import com.example.compose.onPrimaryDark
-import com.example.compose.onPrimaryLight
-import com.example.compose.onTertiaryDark
-import com.example.compose.onTertiaryLight
-import com.example.compose.primaryContainerDark
-import com.example.compose.primaryContainerDarkHighContrast
-import com.example.compose.primaryContainerLight
 import com.example.compose.primaryContainerLightHighContrast
 import com.example.compose.primaryDark
 import com.example.compose.primaryLight
 import com.example.compose.primaryLightHighContrast
-import com.example.compose.secondaryContainerDarkHighContrast
-import com.example.compose.secondaryContainerLightHighContrast
+import com.example.mystudyapp.data.StudyDatabase
+import com.example.mystudyapp.data.StudyEvent
+import com.example.mystudyapp.data.StudyEventDao
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import kotlin.jvm.java
-import androidx.room.Room.databaseBuilder
-import androidx.room.Room.databaseBuilder
-
-
+import java.time.ZoneId.systemDefault
 
 
 class MainActivity : ComponentActivity() {
@@ -139,11 +111,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         // Create the Room database instance
-        val db = Room.databaseBuilder(
-            applicationContext,
-            StudyDatabase::class.java, // Your Database class
-            "study_db" // Name of your database file
-        ).build()
+        val db = StudyDatabase.getInstance(applicationContext)
+        val dao = db.studyEventDao()
 
         enableEdgeToEdge()
         setContent {
@@ -153,9 +122,20 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    MyAppNavHost(darkTheme = darkTheme,
-                        db = db) // Pass the database instance)
+                    MyAppNavHost(
+                        darkTheme = darkTheme,
+                        dao = dao
+                    )
+//                    StudyScreen(dao = dao)
+
+//                    MaterialTheme {
+//                        StudyScreen(dao = dao)
+//                    }
                 }
+//                MaterialTheme {
+//                    StudyScreen(dao = dao)
+//                }
+
             }
         }
     }
@@ -167,19 +147,92 @@ object Screen {
     const val PROFILE = "profile"
     const val SETTINGS = "settings"
     const val MEDIA_UPLOAD = "mediaUpload"
-
-    // placeholders used from ProfileScreen
     const val EDIT_PROFILE = "editProfile"
-
-//    const val ChangePassword = "changePassword"
-//    const val NotificationSettings = "notificationSettings"
 }
+
+@Composable
+fun StudyScreen(dao: StudyEventDao) {
+    val scope = rememberCoroutineScope()
+
+    // observe DB
+    val events by dao.getAllFlow().collectAsState(initial = emptyList())
+
+    // simple input state
+    var name by remember { mutableStateOf("") }
+    var time by remember { mutableStateOf("09:00") }
+
+    // just use "now" for date demo — swap with a DatePicker later
+    val todayMillis = remember { System.currentTimeMillis() }
+
+    Column(Modifier.fillMaxSize().padding(16.dp)) {
+        OutlinedTextField(
+            value = name,
+            onValueChange = { name = it },
+            label = { Text("Study name") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(Modifier.height(8.dp))
+        OutlinedTextField(
+            value = time,
+            onValueChange = { time = it },
+            label = { Text("Time (HH:mm)") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(Modifier.height(12.dp))
+        Button(
+            onClick = {
+                if (name.isNotBlank() && time.isNotBlank()) {
+                    scope.launch {
+                        dao.insert(
+                            StudyEvent(
+                                name = name.trim(),
+                                date = todayMillis,     // replace with picked date
+                                time = time.trim()
+                            )
+                        )
+                        name = ""
+                    }
+                }
+            }
+        ) {
+            Text("Add Study Event")
+        }
+
+        Spacer(Modifier.height(16.dp))
+
+        Text("Upcoming", style = MaterialTheme.typography.titleMedium)
+        Spacer(Modifier.height(8.dp))
+
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(bottom = 24.dp)
+        ) {
+            items(events) { e ->
+                EventCard(e)
+                Spacer(Modifier.height(8.dp))
+            }
+        }
+    }
+}
+
+@Composable
+fun EventCard(e: StudyEvent) {
+    ElevatedCard(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(16.dp)) {
+            Text(e.name, style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(4.dp))
+            Text("Date: ${Date(e.date)} • Time: ${e.time}")
+        }
+    }
+}
+
+
 
 @Composable
     fun MyAppNavHost(
         modifier: Modifier = Modifier,
         darkTheme: MutableState<Boolean>, // Receive darkTheme state
-        db: StudyDatabase, // Add db parameter
+        dao: StudyEventDao,
         navController: NavHostController = rememberNavController(),
         startDestination: String = Screen.SIGN_IN
     ) {
@@ -188,6 +241,12 @@ object Screen {
             startDestination = startDestination,
             modifier = modifier
         ) {
+
+            composable("study") {
+                StudyScreen(dao = dao)
+            }
+
+
             composable(Screen.SIGN_IN) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -201,10 +260,13 @@ object Screen {
             }
             composable(Screen.HOME) { // Changed "home" to Screen.Home for consistency
                 MyHomeScreen(darkTheme = darkTheme,
-                    db = db, // Pass db
+                    dao = dao,
                     navController = navController,
                     modifier = Modifier.fillMaxSize() // Ensure MyHomeScreen fills the available space
                 )
+//                StudyScreen(
+//                    dao = dao
+//                )
             }
 
             composable(Screen.PROFILE) {
@@ -393,7 +455,15 @@ object Screen {
             }
         }
 
+//        if (selectedDate != null && selectedTime != null && eventTitle.isNotBlank()) {
         if (selectedDate != null && selectedTime != null && eventTitle.isNotBlank()) {
+            val newEvent = StudyEvent(
+                name = eventTitle,
+//                date = SimpleDateFormat("dd/MM/yyyy").format(Date(selectedDate!!)),
+                date = selectedDate!!,
+                time = String.format("%02d:%02d", selectedTime!!.first, selectedTime!!.second)
+            )
+
             Card(
                 modifier = Modifier
                     .padding(16.dp)
@@ -415,29 +485,119 @@ object Screen {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     @Composable
-    fun MyUpcomingSection(db: StudyDatabase, containerColor: Color, textColor: Color) {
-//        val sessionsFlow = db.StudyDatabase().getAllSessions()
-//        val sessionsFlow = db.studySessionDao().getAllSessions().collectAsState(initial = emptyList())
-//        val sessionsFlow = db.studyEventDao().getAllFlow().collectAsState(initial = emptyList())
-        val sessionsFlow = db.studyEventDao().getAllFlow()
+    fun MyUpcomingSection(
+        db: StudyDatabase,
+        containerColor: Color,
+        textColor: Color,
+        darkTheme: MutableState<Boolean> // pass this in from your app theme state
+    ) {
+        // val sessions by db.studyEventDao().getAllFlow().collectAsState(initial = emptyList())
 
         Column(
             modifier = Modifier.padding(16.dp),
-            horizontalAlignment =  Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                "Upcoming",
-                color = textColor
-            )
-            MyUpcomingCard(darkTheme = remember { mutableStateOf(false) }) // Added darkTheme state
+            Text("Upcoming", color = if (darkTheme.value) Color.White else Color.Black)
+
+            // sessions.forEach { event ->
+            //     val dateString = java.time.Instant.ofEpochMilli(event.date)
+            //         .atZone(java.time.ZoneId.systemDefault())
+            //         .format(java.time.format.DateTimeFormatter.ofPattern("EEE d MMM yyyy"))
+            //
+            //     MyUpcomingCard(
+            //         darkTheme = darkTheme,
+            //         title = event.name,
+            //         date = dateString,
+            //         time = event.time
+            //     )
+            // }
         }
     }
 
+        // Collect flow as state (consider collectAsStateWithLifecycle if you have lifecycle-runtime-compose)
+//        val sessions by db.studyEventDao().getAllFlow().collectAsState(initial = emptyList())
 
+//        // 1. Fetching data as a Flow
+//        val sessionsFlow = db.studyEventDao().getAllFlow()
+//        // 2. Collecting the Flow as State
+//        val sessions by sessionsFlow.collectAsState(initial = emptyList())
+
+//        Column(
+//            modifier = Modifier.padding(16.dp),
+//            horizontalAlignment =  Alignment.CenterHorizontally
+//        ) {
+//            Text(
+//                "Upcoming",
+//                color = textColor
+//            )
+
+//            val event = sessions
+//                .sortedWith(compareBy<StudyEvent> { it.date }.thenBy { it.time }) // ensure stable ordering
+//                .firstOrNull()
+
+//            if (event != null) {
+//                val dateString = java.time.Instant.ofEpochMilli(event.date)
+//                    .atZone(java.time.ZoneId.systemDefault())
+//                    .format(java.time.format.DateTimeFormatter.ofPattern("EEE d MMM yyyy"))
+
+//                MyUpcomingCard(
+//                    darkTheme = darkTheme,
+//                    title = event.name,
+//                    date = dateString as Long?,
+//                    time = event.time
+//                )
+//            } else {
+//                MyUpcomingCard(darkTheme = darkTheme)
+//            }
+
+
+            // Display the card from the database if available
+//            if (sessions.isNotEmpty()) {
+//                val latestSession = sessions.last() // Or however you want to select the session
+//                MyUpcomingCard(
+//                    darkTheme = remember { mutableStateOf(false) }, // Or pass the actual darkTheme state
+////                    date = SimpleDateFormat("dd/MM/yyyy").format(Date(latestSession.date)),
+////                    time = latestSession.time
+//                )
+//            } else {
+//                MyUpcomingCard(darkTheme = remember { mutableStateOf(false) }) // Default card
+//            }
+
+//        }
+//    }
+
+
+//@Composable
+//    fun MyUpcomingCard(darkTheme: MutableState<Boolean>) { // Added darkTheme parameter
+//    MyUpcomingCard(darkTheme = darkTheme, date = "12/12/2025", time = "12:00") // Default values
+//}
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-    fun MyUpcomingCard(darkTheme: MutableState<Boolean>) { // Added darkTheme parameter
-        Card(
+fun MyUpcomingCard(
+//    darkTheme: MutableState<Boolean>,
+//    title: String = "Study Session",
+//    date: String? = null,
+//    time: String? = null
+    darkTheme: MutableState<Boolean>,
+    title: String = "Study Session",
+    date: Long? = null,
+    time: String? = null
+) {
+
+    Text(
+        text = "DATE: ${
+            date?.let {
+                java.time.Instant.ofEpochMilli(it)
+                    .atZone(systemDefault())
+                    .format(java.time.format.DateTimeFormatter.ofPattern("EEE d MMM yyyy"))
+            } ?: "—"
+        }\nTIME: ${time ?: "—"}"
+    )
+
+
+    Card(
             modifier = Modifier
                 .padding(16.dp)
                 .fillMaxWidth(),
@@ -450,9 +610,10 @@ object Screen {
                     .fillMaxWidth(),
                 horizontalAlignment =  Alignment.CenterHorizontally,
             ) {
-                Text("Study Session", color = if (darkTheme.value) onPrimaryContainerDark else
-                    onPrimaryContainerLightHighContrast
-                )
+//                Text("Study Session", color = if (darkTheme.value) onPrimaryContainerDark else
+//                    onPrimaryContainerLightHighContrast
+//                )
+                Text(title ?: "Study Session", color = if (darkTheme.value) onPrimaryContainerDark else onPrimaryContainerLightHighContrast) // Use the passed title
                 Icon(
                     painter = painterResource(id = R.drawable.calender), // Changed to custom image
                     contentDescription = "Calender",
@@ -461,10 +622,16 @@ object Screen {
                         .clip(RoundedCornerShape(12.dp)), // Add rounded corners
                     tint = Color.Unspecified // To use the original image colors
                 )
-                Text(
-                    text = "DATE: 12/12/2025\nTIME: 12:00",
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
-                    color = if (darkTheme.value) onPrimaryContainerDark else onPrimaryContainerLightHighContrast)
+                if (date != null && time != null) {
+                    Text(
+                        text = "DATE: $date\nTIME: $time",
+                    ) } else {
+                        Text("No upcoming event scheduled.")
+                    }
+//                Text(
+//                    text = "DATE: $date\nTIME: $time",
+//                    modifier = Modifier.align(Alignment.CenterHorizontally),
+//                    color = if (darkTheme.value) onPrimaryContainerDark else onPrimaryContainerLightHighContrast)
             }
         }
     }
@@ -489,7 +656,8 @@ object Screen {
                     .border(BorderStroke(3.dp, onErrorDarkHighContrast), CircleShape) // Darker border for 3D effect
                     .padding(vertical = 4.dp, horizontal = 8.dp) // Adjust padding as needed
             ) {
-                Icon(Icons.Rounded.Add,
+                Icon(
+                    Icons.Rounded.Add,
                     tint = onErrorDark,
                     contentDescription = "Add",
                     modifier = Modifier.fillMaxSize(), // Make the icon fill the IconButton
@@ -581,7 +749,8 @@ fun ProfileScreen(navController: NavHostController, darkTheme: MutableState<Bool
     val usernameState = remember { mutableStateOf("John Doe") }
 
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -697,7 +866,7 @@ fun SettingsScreen(darkTheme: MutableState<Boolean>) {
 
     Column(
         modifier = Modifier
-                        .fillMaxSize()
+            .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -745,7 +914,7 @@ fun MediaUploadPage(modifier: Modifier = Modifier) {
         Scaffold(topBar = { /* use parent app bar or add your own */ }) { innerPadding -> // This Scaffold can be removed if handled by NavHost
             Column(
                 modifier = Modifier
-                                        .padding(innerPadding)
+                    .padding(innerPadding)
                     .fillMaxSize()
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -843,7 +1012,7 @@ fun MediaUploadPage(modifier: Modifier = Modifier) {
     }
 
 @Composable
-fun MyHomeScreen(navController: NavHostController, modifier: Modifier = Modifier, darkTheme: MutableState<Boolean>, db: StudyDatabase) {
+fun MyHomeScreen(navController: NavHostController, modifier: Modifier = Modifier, darkTheme: MutableState<Boolean>, dao: StudyEventDao) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = { MyTopAppBar(navController = navController, darkTheme = darkTheme) }, // Pass darkTheme
@@ -855,27 +1024,29 @@ fun MyHomeScreen(navController: NavHostController, modifier: Modifier = Modifier
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (darkTheme.value) {
-                MyScheduleSection(
-                    containerColor = primaryDark,
-                    textColor = onPrimaryContainerDark // When dark mode
-                )
-                MyUpcomingSection( // Pass darkTheme to MyUpcomingSection
-                    db = db,
-                    containerColor = primaryDark,
-                    textColor = onPrimaryContainerDark
-                )
-            } else {
-                MyScheduleSection(
-                    containerColor = primaryLight,
-                    textColor = primaryLight // When light mode text is dark
-                )
-                MyUpcomingSection( // Pass darkTheme to MyUpcomingSection
-                    db = db,
-                    containerColor = primaryLight,
-                    textColor = primaryLight // When light mode text is dark
-                )
-            }
+//            StudyScreen(dao = dao)
+
+//            if (darkTheme.value) {
+//                MyScheduleSection(
+//                    containerColor = primaryDark,
+//                    textColor = onPrimaryContainerDark // When dark mode
+//                )
+//                MyUpcomingSection( // Pass darkTheme to MyUpcomingSection
+////                    db = db,
+//                    containerColor = primaryDark,
+//                    textColor = onPrimaryContainerDark
+//                )
+//            } else {
+//                MyScheduleSection(
+//                    containerColor = primaryLight,
+//                    textColor = primaryLight // When light mode text is dark
+//                )
+//                MyUpcomingSection( // Pass darkTheme to MyUpcomingSection
+//                    db = db,
+//                    containerColor = primaryLight,
+//                    textColor = primaryLight // When light mode text is dark
+//                )
+//            }
         }
     }
 }

@@ -1,12 +1,24 @@
-package com.example.mystudyapp
+package com.example.mystudyapp.data
 
-import androidx.room.Dao
-import androidx.room.Database
-import androidx.room.Entity
-import androidx.room.Insert
-import androidx.room.PrimaryKey
-import androidx.room.Query
-import androidx.room.RoomDatabase
+import android.content.Context
+import androidx.room.*
+
+@Entity(tableName = "study_events")
+data class StudyEvent(
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    val name: String,
+    val date: Long,      // epoch millis
+    val time: String     // e.g. "14:30"
+)
+
+@Dao
+interface StudyEventDao {
+    @Insert
+    suspend fun insert(entity: StudyEvent)
+
+    @Query("SELECT * FROM study_events ORDER BY date ASC")
+    fun getAllFlow(): kotlinx.coroutines.flow.Flow<List<StudyEvent>>
+}
 
 @Database(
     entities = [StudyEvent::class],
@@ -15,22 +27,17 @@ import androidx.room.RoomDatabase
 )
 abstract class StudyDatabase : RoomDatabase() {
     abstract fun studyEventDao(): StudyEventDao
-}
 
-@Entity(tableName = "study_db") // Example table name
-data class StudyEvent (
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    val name: String
-    // Add other columns
-)
+    companion object {
+        @Volatile private var INSTANCE: StudyDatabase? = null
 
-@Dao
-interface StudyEventDao {
-    @Insert
-    suspend fun insert(entity: StudyEvent)
-
-//    @Query("SELECT * FROM study_db")
-//    fun getAll(): List<StudyEvent>
-@Query("SELECT * FROM study_db")
-fun getAllFlow(): kotlinx.coroutines.flow.Flow<List<StudyEvent>>
+        fun getInstance(context: Context): StudyDatabase =
+            INSTANCE ?: synchronized(this) {
+                INSTANCE ?: Room.databaseBuilder(
+                    context.applicationContext,
+                    StudyDatabase::class.java,
+                    "study_db"
+                ).build().also { INSTANCE = it }
+            }
+    }
 }
