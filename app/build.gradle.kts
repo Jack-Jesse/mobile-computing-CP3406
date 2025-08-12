@@ -50,13 +50,15 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.material3.android)
     implementation(libs.androidx.ui.text.google.fonts)
+    implementation(libs.transport.runtime)
+    implementation(libs.androidx.camera.core)
 
-    // Room Dependencies
-    val roomVersion = "2.6.1"
+    // Room
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    kapt(libs.androidx.room.compiler)
 
-
-    implementation("androidx.room:room-runtime:$roomVersion")
-    kapt("androidx.room:room-compiler:$roomVersion")
-    implementation("androidx.room:room-ktx:$roomVersion")
+//    Datastore
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
 
 }
