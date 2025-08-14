@@ -2,25 +2,21 @@ package com.example.mystudyapp
 
 
 
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.runtime.Composable
+import androidx.annotation.RequiresApi
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.example.mystudyapp.home.HomeScreen
 import com.example.mystudyapp.mediaupload.MediaUploadPage // Assuming MediaUploadPage is in this package
 import com.example.mystudyapp.signin.SignInScreen
-import androidx.navigation.*
-import androidx.navigation.compose.composable
-import com.example.mystudyapp.mediaupload.MediaUploadPage
-
 
 
 //fun NavGraphBuilder.AppNavGraph(navController: NavHostController) {
+@RequiresApi(Build.VERSION_CODES.O)
 fun NavGraphBuilder.appNavGraph(navController: NavHostController) {
 
     composable(Screen.SIGN_IN) {
@@ -32,26 +28,26 @@ fun NavGraphBuilder.appNavGraph(navController: NavHostController) {
     composable(Screen.MEDIA_UPLOAD) {
         // Testing
         // Create pickers here and pass their launchers to the UI
-        val pickPdf = rememberLauncherForActivityResult(
+        val onPickCreateEvent = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.OpenDocument()
         ) { uri ->
             // TODO: hand off to VM if needed (e.g., hiltViewModel().onPdfPicked(uri))
         }
 
-        val pickAudio = rememberLauncherForActivityResult(
+        val onPickUploadMedia = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.GetContent()
         ) { uri -> /* TODO: send to VM */ }
 
-        val pickVideo = rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.PickVisualMedia()
-        ) { uri -> /* TODO: send to VM */ }
-
-
-
         MediaUploadPage(
-            onPickPdf = { /* launch picker */ },
-            onPickAudio = { /* launch picker */ },
-            onPickVideo = { /* launch picker */ }
+            onPickUploadMedia = { onPickUploadMedia.launch("application/pdf") },
+            onPickCreateEvent = { onPickCreateEvent.launch(arrayOf("application/pdf")) },
+            onEventScheduled = {onEventScheduled -> /* TODO: send to VM */ },
+            onEventNameChanged = { onEventNameChanged -> /* TODO: send to VM */ },
+            navController = navController,
         )
+
+
+
+
     }
 }

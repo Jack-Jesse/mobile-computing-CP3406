@@ -1,5 +1,8 @@
 package com.example.mystudyapp.mediaupload
 
+import android.R.attr.title
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -7,33 +10,63 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.TextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
 import com.example.mystudyapp.R
+import com.example.mystudyapp.Screen
+import com.example.mystudyapp.home.HomeScreen
 
+import java.time.Instant
+import java.time.ZoneId
+
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MediaUploadPage(
-    onPickPdf: () -> Unit,
-    onPickAudio: () -> Unit,
-    onPickVideo: () -> Unit,
-
-    modifier: Modifier = Modifier
+    onPickUploadMedia: () -> Unit,
+    onEventScheduled: (selectedDateMillis: Long?) -> Unit, // Callback with the selected date
+    onEventNameChanged: (String) -> Unit, // Callback for event name changes
+    navController: NavController,
+    onPickCreateEvent: () -> Unit,
 ) {
+
+
+    // Testing
+    var showEventNameDialog by remember { mutableStateOf(false) }
+    var showDatePickerDialog by remember { mutableStateOf(false) }
+    var eventName by remember { mutableStateOf("") }
+    val datePickerState = rememberDatePickerState()
+    var selectedDateText by remember { mutableStateOf("Schedule Event") } // To update button text
+
+
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Scaffold(topBar = {
             TopAppBar(
@@ -51,7 +84,7 @@ fun MediaUploadPage(
 
                 // Media Upload Button
                 Button(
-                    onClick = { /* Handle PDF upload */ },
+                    onClick = onPickUploadMedia,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color.Transparent,
                         contentColor = MaterialTheme.colorScheme.onSurface,
@@ -78,7 +111,7 @@ fun MediaUploadPage(
 
                 // Schedule Event Button
                 Button(
-                    onClick = { /* Handle Set event button */ },
+                    onClick = { showDatePickerDialog = true; showEventNameDialog = true },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color.Transparent,
                         contentColor = MaterialTheme.colorScheme.onSurface,
@@ -101,6 +134,16 @@ fun MediaUploadPage(
                         )
                         Text("Schedule Event")
                     }
+                }
+
+
+                if (showDatePickerDialog) {
+                    EventCreation(
+                        onDismiss = { showDatePickerDialog = false },
+                        onEventCreated = { /* Handle event creation if needed, then navigate */
+                            navController.navigate(Screen.HOME) },
+                        navController = navController
+                    )
                 }
             }
         }
