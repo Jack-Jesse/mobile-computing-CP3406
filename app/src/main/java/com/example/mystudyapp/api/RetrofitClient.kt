@@ -22,7 +22,9 @@ val request = GeminiRequest(
     contents = listOf(
         GeminiContent(
             parts = listOf(
-                GeminiPart(text = "Explain how AI works in a few words")
+//                GeminiPart(text = "Explain how AI works in a few words")
+                GeminiPart(text = "Summarise this into study flash cards: ")
+
             )
         )
     )

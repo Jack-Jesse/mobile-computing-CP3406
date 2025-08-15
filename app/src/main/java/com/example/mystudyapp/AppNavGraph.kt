@@ -2,6 +2,7 @@ package com.example.mystudyapp
 
 
 
+import android.net.Uri
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -13,6 +14,7 @@ import androidx.navigation.compose.composable
 import com.example.mystudyapp.home.HomeScreen
 import com.example.mystudyapp.mediaupload.MediaUploadPage // Assuming MediaUploadPage is in this package
 import com.example.mystudyapp.signin.SignInScreen
+import convertPdfToText
 
 
 //fun NavGraphBuilder.AppNavGraph(navController: NavHostController) {
@@ -26,6 +28,7 @@ fun NavGraphBuilder.appNavGraph(navController: NavHostController) {
         HomeScreen(navController, context = LocalContext.current)
     }
     composable(Screen.MEDIA_UPLOAD) {
+
         // Testing
         // Create pickers here and pass their launchers to the UI
         val onPickCreateEvent = rememberLauncherForActivityResult(
@@ -34,9 +37,20 @@ fun NavGraphBuilder.appNavGraph(navController: NavHostController) {
             // TODO: hand off to VM if needed (e.g., hiltViewModel().onPdfPicked(uri))
         }
 
+//        val onPickUploadMedia = rememberLauncherForActivityResult(
+//            contract = ActivityResultContracts.GetContent()
+//        ) { uri -> /* TODO: send to VM */ }
+
+        val context = LocalContext.current
+
         val onPickUploadMedia = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.GetContent()
-        ) { uri -> /* TODO: send to VM */ }
+        ) { uri: Uri? ->
+            uri?.let {
+                convertPdfToText(context, it)
+            }
+        }
+
 
         MediaUploadPage(
             onPickUploadMedia = { onPickUploadMedia.launch("application/pdf") },

@@ -1,6 +1,7 @@
 package com.example.mystudyapp.mediaupload
 
 import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -36,6 +37,7 @@ import androidx.navigation.NavController
 import com.example.mystudyapp.R
 import com.example.mystudyapp.Screen
 import com.example.mystudyapp.data.local.database.EventDatabase
+import com.example.mystudyapp.mediaupload.UploadPdfScreen
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -82,7 +84,7 @@ fun MediaUploadPage(
                 // Media Upload Button
                 Button(
                     onClick = onPickUploadMedia,
-                    colors = ButtonDefaults.buttonColors(
+                            colors = ButtonDefaults.buttonColors(
                         containerColor = Color.Transparent,
                         contentColor = MaterialTheme.colorScheme.onSurface,
                     ),
