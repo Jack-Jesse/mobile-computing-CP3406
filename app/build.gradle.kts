@@ -56,6 +56,7 @@ dependencies {
     // Room
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.adapters)
     kapt(libs.androidx.room.compiler)
 
 //    Datastore

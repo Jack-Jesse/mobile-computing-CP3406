@@ -1,7 +1,6 @@
 package com.example.mystudyapp.data.local.database
 
 import android.content.Context
-import androidx.activity.result.launch
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
@@ -11,15 +10,13 @@ import com.example.mystudyapp.data.local.entity.StudyEvent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.util.concurrent.Executors
-import kotlin.Long
-import kotlin.String
-import kotlin.random.Random
+
+
 
 
 @Database(
-    entities = [StudyEvent::class], // TODO: replace with your entity(ies)
-    version = 1,
+    entities = [StudyEvent::class],
+    version = 2,
     exportSchema = false
 )
 abstract class EventDatabase : RoomDatabase() {
@@ -52,6 +49,7 @@ abstract class EventDatabase : RoomDatabase() {
                                             description = "Populated when DB was created.",
                                             date = "2025-10-12",
                                             time = "10:00 AM"
+
                                         )
                                     )
                                     println("DatabaseCheck: Populated when DB was created.")
@@ -73,7 +71,7 @@ abstract class EventDatabase : RoomDatabase() {
 
                         }
                     })
-                    // .fallbackToDestructiveMigration() // dev-only; remove when you add real migrations
+//                     .fallbackToDestructiveMigration() // dev-only; remove when you add real migrations
                     .build().also { INSTANCE = it }
             }
         }

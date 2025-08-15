@@ -1,6 +1,5 @@
 package com.example.mystudyapp.mediaupload
 
-import android.R.attr.title
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
@@ -10,25 +9,21 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.TextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,14 +33,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
 import com.example.mystudyapp.R
 import com.example.mystudyapp.Screen
-import com.example.mystudyapp.home.HomeScreen
-
-import java.time.Instant
-import java.time.ZoneId
+import com.example.mystudyapp.data.local.database.EventDatabase
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -55,7 +45,7 @@ fun MediaUploadPage(
     onEventScheduled: (selectedDateMillis: Long?) -> Unit, // Callback with the selected date
     onEventNameChanged: (String) -> Unit, // Callback for event name changes
     navController: NavController,
-    onPickCreateEvent: () -> Unit,
+//    onPickCreateEvent: () -> Unit,
 ) {
 
 
@@ -65,6 +55,13 @@ fun MediaUploadPage(
     var eventName by remember { mutableStateOf("") }
     val datePickerState = rememberDatePickerState()
     var selectedDateText by remember { mutableStateOf("Schedule Event") } // To update button text
+//    var formattedEventName by remember { mutableStateOf("") }
+
+//    val context = LocalContext.current.applicationContext
+//    val composableScope = rememberCoroutineScope() // Or a more global scope if appropriate
+//    val studyEventDao = remember {
+//        EventDatabase.getDatabase(context, composableScope /* or Dispatchers.IO if getDatabase manages its own scope internally for callbacks */).eventDao()
+//    }
 
 
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
@@ -128,7 +125,7 @@ fun MediaUploadPage(
                             contentDescription = "Schedule Event",
                             tint = Color.Unspecified,
                             modifier = Modifier
-                                .padding(vertical = 8.dp) // Add some padding around the icon
+                                .padding(vertical = 8.dp) // Add padding around the icon
                                 .shadow(elevation = 4.dp, shape = RoundedCornerShape(15.dp)) // Shadow for the icon
                                 .size(100.dp)
                         )
@@ -140,11 +137,15 @@ fun MediaUploadPage(
                 if (showDatePickerDialog) {
                     EventCreation(
                         onDismiss = { showDatePickerDialog = false },
-                        onEventCreated = { /* Handle event creation if needed, then navigate */
-                            navController.navigate(Screen.HOME) },
-                        navController = navController
+                        onEventCreated = {
+                            navController.navigate(Screen.HOME)
+                        },
+                        navController = navController,
+//                        studyEventDao = studyEventDao,
+//                        composableScope
                     )
                 }
+
             }
         }
     }

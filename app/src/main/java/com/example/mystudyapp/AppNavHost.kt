@@ -1,5 +1,7 @@
 package com.example.mystudyapp
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
@@ -19,6 +21,7 @@ object Screen {
     const val EDIT_PROFILE = "editProfile"
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AppNavHost(
     navController: NavHostController = rememberNavController()

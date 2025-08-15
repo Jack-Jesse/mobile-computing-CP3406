@@ -10,6 +10,6 @@ data class StudyEvent(
     val id: Long = 0,
     val title: String,
     val description: String,
-    val date: String,
-    val time: String
+    val date: String?,
+    val time: String?
 )

@@ -40,7 +40,6 @@ fun NavGraphBuilder.appNavGraph(navController: NavHostController) {
 
         MediaUploadPage(
             onPickUploadMedia = { onPickUploadMedia.launch("application/pdf") },
-            onPickCreateEvent = { onPickCreateEvent.launch(arrayOf("application/pdf")) },
             onEventScheduled = {onEventScheduled -> /* TODO: send to VM */ },
             onEventNameChanged = { onEventNameChanged -> /* TODO: send to VM */ },
             navController = navController,
