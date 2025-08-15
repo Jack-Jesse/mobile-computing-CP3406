@@ -24,7 +24,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.currentCompositionLocalContext
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,6 +38,7 @@ import com.example.mystudyapp.data.local.database.EventDatabase
 import com.example.mystudyapp.data.local.entity.StudyEvent
 import com.example.mystudyapp.signin.getUsername
 import com.example.mystudyapp.ui.theme.AppTypography
+import kotlinx.coroutines.CoroutineScope
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,7 +46,10 @@ fun HomeScreen(navController: NavHostController, context: Context) {
     val usernameFlow = getUsername(context) // Flow<String>
     val username by usernameFlow.collectAsState(initial = "")
 //    val db = EventDatabase.getDatabase(context)
-    val db = EventDatabase.getDatabase(context)
+//    val composableScope: CoroutineScope = null
+    val composableScope = rememberCoroutineScope() // <<< FIX: Initialize here
+    val db = EventDatabase.getDatabase(context, composableScope)
+
     val studyDao = db.eventDao()
 
     // Optional: If you want to display the status in your UI
@@ -73,7 +76,6 @@ fun HomeScreen(navController: NavHostController, context: Context) {
         }
     }
 
-    val scope = rememberCoroutineScope()
 
 
 
@@ -143,30 +145,30 @@ fun HomeScreen(navController: NavHostController, context: Context) {
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         if (studyTableEmpty == true || allEvents.isEmpty()) {
-//                            Text("No Upcoming Events", style = AppTypography.titleLarge)
-//                            Text("Your Events Go Here", style = AppTypography.titleMedium)
-//                            Text("Date: 2025-10-12", style = AppTypography.titleSmall)
-//                            Text("Time: 10:00 AM", style = AppTypography.displaySmall)
-//                            Text("Click the (+) button below to start adding!", style = AppTypography.titleMedium)
+                            Text("No Upcoming Events", style = AppTypography.titleLarge)
+                            Text("Your Events Go Here", style = AppTypography.titleMedium)
+                            Text("Date: 2025-10-12", style = AppTypography.titleSmall)
+                            Text("Time: 10:00 AM", style = AppTypography.displaySmall)
+                            Text("Click the (+) button below to start adding!", style = AppTypography.titleMedium)
 
 
 
-                            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                items(allEvents.size) { index ->
-                                    val event = allEvents[index]
-                                    Column {
-                                        Text("Title: ${event.title}", style = AppTypography.titleLarge)
-
-                                        Text(
-                                            "Description: ${event.description}",
-                                            style = AppTypography.titleMedium
-                                        )
-                                        Text("Date: ${event.date}", style = AppTypography.titleSmall)
-                                        Text("Time: ${event.time}", style = AppTypography.displaySmall)
-                                        println("DatabaseCheck: Title: ${event.title}")
-                                    }
-                                }
-                            }
+//                            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+//                                items(allEvents.size) { index ->
+//                                    val event = allEvents[index]
+//                                    Column {
+//                                        Text("Title: ${event.title}", style = AppTypography.titleLarge)
+//
+//                                        Text(
+//                                            "Description: ${event.description}",
+//                                            style = AppTypography.titleMedium
+//                                        )
+//                                        Text("Date: ${event.date}", style = AppTypography.titleSmall)
+//                                        Text("Time: ${event.time}", style = AppTypography.displaySmall)
+//                                        println("DatabaseCheck: Title: ${event.title}")
+//                                    }
+//                                }
+//                            }
 
                         } else {
                             // Display all events using a LazyColumn

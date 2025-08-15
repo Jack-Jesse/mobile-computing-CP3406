@@ -1,15 +1,17 @@
 package com.example.mystudyapp.data.local.database
 
-import android.content.Context
+import androidx.camera.core.impl.QuirkSettingsHolder.instance
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.mystudyapp.data.local.dao.StudyEventDao
 import com.example.mystudyapp.data.local.entity.StudyEvent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import android.content.Context
 
 
 
@@ -17,8 +19,11 @@ import kotlinx.coroutines.launch
 @Database(
     entities = [StudyEvent::class],
     version = 2,
+
     exportSchema = false
 )
+
+
 abstract class EventDatabase : RoomDatabase() {
     abstract fun eventDao(): StudyEventDao
 
@@ -27,14 +32,16 @@ abstract class EventDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: EventDatabase? = null
 
-        fun getDatabase(context: Context): EventDatabase {
+        fun getDatabase(context: Context, composableScope: CoroutineScope): EventDatabase {
+            // if the INSTANCE is not null, then return it,
+            // if it is, then create the database
             return INSTANCE ?: synchronized(this) {
-                INSTANCE ?: Room.databaseBuilder(
+                val instance = Room.databaseBuilder(
                     context.applicationContext,
                     EventDatabase::class.java,
                     "event_database"
                 )
-                    // Test event
+                    // Wipes and rebuilds instead of migrating if no Migration object.
                     .addCallback(object : Callback() {
                         override fun onCreate(db: SupportSQLiteDatabase) {
                             super.onCreate(db)
@@ -71,8 +78,17 @@ abstract class EventDatabase : RoomDatabase() {
 
                         }
                     })
-//                     .fallbackToDestructiveMigration() // dev-only; remove when you add real migrations
-                    .build().also { INSTANCE = it }
+//                    .addMigrations(object : Migration(1, 2) {
+//                        override fun migrate(db: SupportSQLiteDatabase) {
+//                            // Example migration: Add a new column to the study_events table
+//                            db.execSQL("ALTER TABLE study_events ADD COLUMN new_column TEXT")
+//                            println("DatabaseCheck: Migrated from version 1 to 2. Added new_column.")
+//                        }
+//                    })
+                    .fallbackToDestructiveMigration() // Drops and recreates the database on version mismatch
+                    .build()
+                INSTANCE = instance
+                instance
             }
         }
     }

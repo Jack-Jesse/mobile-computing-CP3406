@@ -40,8 +40,8 @@ fun EventCreation(
     onDismiss: () -> Unit,
     onEventCreated: (StudyEvent) -> Unit,
     navController: NavController,
-//    studyEventDao: StudyEventDao, // Inject Dao
-//    coroutineScope: CoroutineScope // Inject CoroutineScope
+    studyEventDao: StudyEventDao, // Inject Dao
+    coroutineScope: CoroutineScope // Inject CoroutineScope
 ) {
     var currentStep by remember { mutableStateOf(EventCreationStep.Date) }
 
@@ -58,7 +58,7 @@ fun EventCreation(
     val timePickerState = rememberTimePickerState() // Assuming you have a TimePickerState
 
     // Get a CoroutineScope that is tied to this Composable's lifecycle
-//    val composableScope = rememberCoroutineScope()
+    val composableScope = rememberCoroutineScope()
 
     when (currentStep) {
         EventCreationStep.Date -> {
@@ -137,26 +137,16 @@ fun EventCreation(
 
                             // Testing Event Creation
                             val newEvent = StudyEvent(
-//                                id = TODO(),
                                 title = eventName,
                                 description = eventDescription,
                                 date = formattedDate,
                                 time = formattedTime
                             )
 
-//                            composableScope.launch { // Use the Composable's scope
-//                                try {
-//                                    studyEventDao.insert(newEvent) // Call the suspend function
-//                                    println("DB_INSERT: Event saved successfully: $newEvent")
-//
-//                                    // 3. Call the callback and dismiss AFTER successful insertion
-//                                    onEventCreated(newEvent) // Notify the caller
-//                                    // onDismiss() // Now dismiss after success
-//                                } catch (e: Exception) {
-//                                    println("DB_INSERT_ERROR: Failed to save event: ${e.localizedMessage}")
-//                                    // Optionally show an error message to the user
-//                                }
-//                            }
+                            // Insert into Database
+                            composableScope.launch {
+                                studyEventDao.insert(newEvent)
+                            }
 
                             onEventCreated(newEvent)
                             // Testing Event Creation print to log

@@ -57,11 +57,11 @@ fun MediaUploadPage(
     var selectedDateText by remember { mutableStateOf("Schedule Event") } // To update button text
 //    var formattedEventName by remember { mutableStateOf("") }
 
-//    val context = LocalContext.current.applicationContext
-//    val composableScope = rememberCoroutineScope() // Or a more global scope if appropriate
-//    val studyEventDao = remember {
-//        EventDatabase.getDatabase(context, composableScope /* or Dispatchers.IO if getDatabase manages its own scope internally for callbacks */).eventDao()
-//    }
+    val context = LocalContext.current.applicationContext
+    val composableScope = rememberCoroutineScope() // Or a more global scope if appropriate
+    val studyEventDao = remember {
+        EventDatabase.getDatabase(context, composableScope /* or Dispatchers.IO if getDatabase manages its own scope internally for callbacks */).eventDao()
+    }
 
 
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
@@ -141,8 +141,8 @@ fun MediaUploadPage(
                             navController.navigate(Screen.HOME)
                         },
                         navController = navController,
-//                        studyEventDao = studyEventDao,
-//                        composableScope
+                        studyEventDao = studyEventDao,
+                        composableScope
                     )
                 }
 

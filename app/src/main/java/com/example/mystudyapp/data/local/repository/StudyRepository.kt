@@ -1,5 +1,6 @@
 package com.example.mystudyapp.data.local.repository
 
+//import androidx.compose.foundation.text2.input.insert
 import com.example.mystudyapp.data.local.dao.StudyEventDao
 import com.example.mystudyapp.data.local.entity.StudyEvent
 
@@ -22,4 +23,12 @@ class StudyRepository(private val studyEventDao: StudyEventDao) {
             Result.failure(e)
         }
     }
+
+//    suspend fun insertEvent(event: StudyEvent) {
+//        // Add a println here
+//        println("Repository: Inserting event: ${event.title}")
+//        eventDao.insert(event)
+//    }
+
+
 }
