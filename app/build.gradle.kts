@@ -57,12 +57,15 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.adapters)
+    implementation(libs.generativeai)
     kapt(libs.androidx.room.compiler)
 
 //    Datastore
     implementation("androidx.datastore:datastore-preferences:1.1.1")
 
-    // time picker dependency
-
+// Language Model API
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
 }

@@ -78,13 +78,6 @@ abstract class EventDatabase : RoomDatabase() {
 
                         }
                     })
-//                    .addMigrations(object : Migration(1, 2) {
-//                        override fun migrate(db: SupportSQLiteDatabase) {
-//                            // Example migration: Add a new column to the study_events table
-//                            db.execSQL("ALTER TABLE study_events ADD COLUMN new_column TEXT")
-//                            println("DatabaseCheck: Migrated from version 1 to 2. Added new_column.")
-//                        }
-//                    })
                     .fallbackToDestructiveMigration() // Drops and recreates the database on version mismatch
                     .build()
                 INSTANCE = instance
