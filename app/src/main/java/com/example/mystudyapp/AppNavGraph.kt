@@ -105,19 +105,15 @@ fun NavGraphBuilder.appNavGraph(navController: NavHostController) {
             onDismissFlashcards = { showFlashcardDialog = false },
             onDismissError = { errorMessage = null },
 
-            // --- ENSURE THESE PARAMETERS ARE PRESENT AND CORRECT ---
             eventName = eventName,
-            onEventNameChanged = { newName -> // <<< THIS IS THE MISSING/INCORRECT PARAMETER
+            onEventNameChanged = { newName ->
                 eventName = newName
             },
             onEventScheduled = { message ->
                 eventScheduledMessage = message
-                // Optionally clear eventName or do other UI updates
-                // eventName = ""
             },
             eventScheduledMessage = eventScheduledMessage,
             onDismissEventScheduledMessage = { eventScheduledMessage = null }
-            // Add any other parameters your MediaUploadPage composable function requires
         )
     }
 }

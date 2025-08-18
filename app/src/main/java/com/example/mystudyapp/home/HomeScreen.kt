@@ -33,47 +33,49 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.compose.ui.unit.dp
+import androidx.room.RoomDatabase
 import com.example.mystudyapp.Screen
-import com.example.mystudyapp.data.local.database.EventDatabase
+//import com.example.mystudyapp.data.local.database.EventDatabase
 import com.example.mystudyapp.data.local.entity.StudyEvent
 import com.example.mystudyapp.signin.getUsername
 import com.example.mystudyapp.AppTypography
+import com.example.mystudyapp.data.local.dao.StudyEventDao
+import com.example.mystudyapp.data.local.database.AppDatabase
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(navController: NavHostController, context: Context) {
     val usernameFlow = getUsername(context) // Flow<String>
     val username by usernameFlow.collectAsState(initial = "")
-//    val db = EventDatabase.getDatabase(context)
-//    val composableScope: CoroutineScope = null
-    val composableScope = rememberCoroutineScope() // <<< FIX: Initialize here
-    val db = EventDatabase.getDatabase(context, composableScope)
 
-    val studyDao = db.eventDao()
+    val eventDao = remember { AppDatabase.getDatabase(context).studyEventDao() }
+
+    val latestEventState by eventDao.getLatestEvent().collectAsState(initial = null)
 
     // Optional: If you want to display the status in your UI
     var studyTableEmpty by remember { mutableStateOf<Boolean?>(null) } // Null initially, then true/false
     var allEvents by remember { mutableStateOf<List<StudyEvent>>(emptyList()) }
 
+
     // Perform the database check when the Composable is first launched
-    LaunchedEffect(key1 = Unit) { // Re-run if studyDao instance were to change. Use Unit to run once.
-        try {
-            val count = studyDao.getCount() // Call your suspend fun from the DAO
-            studyTableEmpty = count == 0
-            if (studyTableEmpty == true) {
-                Log.d("DatabaseCheck", "The study_table is empty.")
-                println("DatabaseCheck: The study_table is empty.")
-            } else {
-                allEvents = studyDao.getAllEvents() // Fetch all events if not empty
-                Log.d("DatabaseCheck", "The study_table is NOT empty. Count: $count")
-                println("DatabaseCheck: The study_table is NOT empty. Count: $count")
-            }
-        } catch (e: Exception) {
-            Log.e("DatabaseCheck", "Error checking if study_table is empty", e)
-            println("DatabaseCheck: Error checking if study_table is empty: ${e.message}")
-            studyTableEmpty = null // Indicate error or unknown state
-        }
-    }
+//    LaunchedEffect(key1 = Unit) { // Re-run if studyDao instance were to change. Use Unit to run once.
+//        try {
+//            val count = eventDao.getCount() // Call your suspend fun from the DAO
+//            studyTableEmpty = count == 0
+//            if (studyTableEmpty == true) {
+//                Log.d("DatabaseCheck", "The study_table is empty.")
+//                println("DatabaseCheck: The study_table is empty.")
+//            } else {
+//                allEvents = eventDao.getAllEvents() // Fetch all events if not empty
+//                Log.d("DatabaseCheck", "The study_table is NOT empty. Count: $count")
+//                println("DatabaseCheck: The study_table is NOT empty. Count: $count")
+//            }
+//        } catch (e: Exception) {
+//            Log.e("DatabaseCheck", "Error checking if study_table is empty", e)
+//            println("DatabaseCheck: Error checking if study_table is empty: ${e.message}")
+//            studyTableEmpty = null // Indicate error or unknown state
+//        }
+//    }
 
 
 
@@ -91,7 +93,7 @@ fun HomeScreen(navController: NavHostController, context: Context) {
                 // FloatingActionButton for adding new events or items
                 Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                     FloatingActionButton(onClick = { navController.navigate(Screen.MEDIA_UPLOAD) }) {
-                    Icon(Icons.Filled.Add, "Add new study material")
+                        Icon(Icons.Filled.Add, "Add new study material")
                     }
                 }
             }
@@ -143,15 +145,53 @@ fun HomeScreen(navController: NavHostController, context: Context) {
                         horizontalAlignment = Alignment.Start,
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
+
+
+                        Text(
+                            "Latest Event", // Changed title
+                            style = AppTypography.titleLarge
+                        )
+
+                        // Get the event from the state
+                        val eventToShow = latestEventState
+
+
+
                         if (studyTableEmpty == true || allEvents.isEmpty()) {
                             Text("No Upcoming Events", style = AppTypography.titleLarge)
                             Text("Your Events Go Here", style = AppTypography.titleMedium)
                             Text("Date: 2025-10-12", style = AppTypography.titleSmall)
                             Text("Time: 10:00 AM", style = AppTypography.displaySmall)
-                            Text("Click the (+) button below to start adding!", style = AppTypography.titleMedium)
+                            Text(
+                                "Click the (+) button below to start adding!",
+                                style = AppTypography.titleMedium
+                            )
+                        } else {
+                            // Display the details of the latest event
+                            Text(
+                                "Title: ${eventToShow?.title}",
+                                style = AppTypography.titleMedium
+                            )
+                            Text(
+                                "Description: ${eventToShow?.description}",
+                                style = AppTypography.bodyMedium
+                            )
+                            eventToShow?.date?.let {
+                                Text("Date: $it", style = AppTypography.bodySmall)
+                            }
+                            eventToShow?.time?.let {
+                                Text("Time: $it", style = AppTypography.bodySmall)
+                            }
+                            Log.d("DatabaseCheck", "Displaying Latest Event: ${eventToShow?.title}")
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
-
-
+                            // Display all events using a LazyColumn
 //                            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
 //                                items(allEvents.size) { index ->
 //                                    val event = allEvents[index]
@@ -165,32 +205,17 @@ fun HomeScreen(navController: NavHostController, context: Context) {
 //                                        Text("Date: ${event.date}", style = AppTypography.titleSmall)
 //                                        Text("Time: ${event.time}", style = AppTypography.displaySmall)
 //                                        println("DatabaseCheck: Title: ${event.title}")
+
+
+
+
 //                                    }
 //                                }
 //                            }
-
-                        } else {
-                            // Display all events using a LazyColumn
-                            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                items(allEvents.size) { index ->
-                                    val event = allEvents[index]
-                                    Column {
-                                        Text("Title: ${event.title}", style = AppTypography.titleLarge)
-
-                                        Text(
-                                            "Description: ${event.description}",
-                                            style = AppTypography.titleMedium
-                                        )
-                                        Text("Date: ${event.date}", style = AppTypography.titleSmall)
-                                        Text("Time: ${event.time}", style = AppTypography.displaySmall)
-                                        println("DatabaseCheck: Title: ${event.title}")
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
+//}

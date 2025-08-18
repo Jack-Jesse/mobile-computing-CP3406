@@ -44,8 +44,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DisplayMode
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -68,7 +70,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.mystudyapp.R
 import com.example.mystudyapp.Screen
-import com.example.mystudyapp.data.local.database.EventDatabase
+import com.example.mystudyapp.data.local.database.AppDatabase
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -95,6 +97,10 @@ fun MediaUploadPage(
     val context = LocalContext.current
     var currentFlashcardIndex by remember { mutableStateOf(0) }
     var showDatePicker by remember { mutableStateOf(false) }
+    var showTimePicker by remember { mutableStateOf(false) }
+    var showEventNameDialog by remember { mutableStateOf(false) }
+    var tempEventName by remember { mutableStateOf("") }
+    var tempEventDescription by remember { mutableStateOf("") }
 
     Scaffold(
         topBar = {
@@ -161,26 +167,58 @@ fun MediaUploadPage(
             // Button to Schedule Event
                 Button(
                     onClick = {
-                        if (eventName.isNotBlank()) {
-                            onEventScheduled("Event '$eventName' scheduled for selected PDF content.")
-                        } else {
-                            onEventScheduled("PDF content processed (no event name given).")
-                        }
-                        // Material 3 schedule event logic here
-                        // After scheduling (or showing the message), open the DatePicker
-                        showDatePicker = true
-
-                        // Clear the event name after scheduling
-                        onEventNameChanged("")
-
-
-
+                        showEventNameDialog = true
                     },
 //                    enabled = !isLoading && flashcards.isNotEmpty(), // Enable if not loading AND flashcards are ready
 
                     modifier = Modifier.fillMaxWidth(0.8f)
                 ) {
                     Text("Schedule Study Event")
+                }
+
+                // --- Dialog to Enter Event Name and Description ---
+                if (showEventNameDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showEventNameDialog = false },
+                        title = { Text("Event Details") },
+                        text = {
+                            Column {
+                                OutlinedTextField(
+                                    value = tempEventName,
+                                    onValueChange = { tempEventName = it },
+                                    label = { Text("Event Name (Optional)") },
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                OutlinedTextField(
+                                    value = tempEventDescription,
+                                    onValueChange = { tempEventDescription = it },
+                                    label = { Text("Event Description (Optional)") },
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                        },
+                        confirmButton = {
+                            Button(onClick = {
+                                onEventNameChanged(tempEventName) // Update the actual eventName
+                                // Proceed to date picker
+                                showEventNameDialog = false
+                                showDatePicker = true
+
+                                // Prepare for scheduling (message and potentially actual scheduling logic)
+                                val eventTitle = tempEventName.ifBlank { "Study Session" }
+                                val effectiveDescription = tempEventDescription.ifBlank { "Review flashcards generated from the PDF." }
+
+                                if (eventTitle.isNotBlank()) {
+                                    onEventScheduled("Event '$eventTitle' details captured. Please select date and time.")
+                                } else {
+                                    onEventScheduled("Details captured. Please select date and time for your study session.")
+                                }
+                                // The actual calendar event scheduling will happen after time is picked.
+                            }) { Text("Next") }
+                        },
+                        dismissButton = { Button(onClick = { showEventNameDialog = false }) { Text("Cancel") } }
+                    )
                 }
 
                 // --- Date Picker Dialog ---
@@ -193,43 +231,69 @@ fun MediaUploadPage(
                         confirmButton = {
                             Button(onClick = {
                                 datePickerState.selectedDateMillis?.let { millis ->
-                                    // Schedule the actual event using the selected date
-                                    scheduleCalendarEvent(context, eventName, millis, flashcards.joinToString("\n\n"))
+                                    // Store the selected date or pass it along
+                                    // For now, just proceed to time picker
+                                    showDatePicker = false // Close date picker
+                                    showTimePicker = true // Open time picker
+                                } ?: run {
+                                    // Handle case where no date is selected if necessary
+                                    // For example, show a toast or a message
+                                    onEventScheduled("Please select a date.")
                                 }
-                                showDatePicker = false // Close the picker
                             }) { Text("Confirm") }
                         },
                         dismissButton = { Button(onClick = { showDatePicker = false }) { Text("Cancel") } }
                     )
                 }
 
+                // --- Time Picker Dialog ---
+                if (showTimePicker) {
+                    val timePickerState = rememberTimePickerState()
+                    AlertDialog(
+                        onDismissRequest = { showTimePicker = false },
+                        title = { Text("Select Event Time") },
+                        text = {
+                            // Corrected usage of TimePicker - Wrap in a Composable if needed or ensure it's placed directly
+                            // For now, let's assume TimePicker is a direct composable child here.
+                            // If TimePicker itself needs a specific layout, adjust accordingly.
+                            androidx.compose.material3.TimePicker(state = timePickerState)
+                               },
+                        confirmButton = {
+                            Button(onClick = {
+                                showTimePicker = false
+                                // Combine date and time (you'll need the selected date from the date picker)
+                                // And then call the actual scheduling logic
+//                                val selectedDateMillis = datePickerState.selectedDateMillis ?: Calendar.getInstance().timeInMillis // Fallback to now if null
+                                val calendar = Calendar.getInstance().apply {
+//                                    timeInMillis = selectedDateMillis
+                                    set(Calendar.HOUR_OF_DAY, timePickerState.hour)
+                                    set(Calendar.MINUTE, timePickerState.minute)
+                                }
+                                val finalEventTimeMillis = calendar.timeInMillis
+                                val eventTitle = eventName.ifBlank { "Flashcards Study Session" }
+                                val eventDesc = tempEventDescription.ifBlank { "Create more flashcards from a PDF." }
+                                scheduleCalendarEvent(context, eventTitle, finalEventTimeMillis, eventDesc)
+                                onEventScheduled("Event '$eventTitle' scheduled!")                             }) { Text("Confirm") }
+                        },
+                        dismissButton = { Button(onClick = { showDatePicker = false }) { Text("Cancel") } }
+                    )
+                }
 
-                // --- Display Error Messages ---
-//                if (errorMessage != null) {
-//                    Text(
-//                        text = "Error: $errorMessage",
-//                        color = MaterialTheme.colorScheme.error,
-//                        modifier = Modifier.padding(top = 8.dp)
-//                    )
-//                    Button(onClick = onDismissError, modifier = Modifier.padding(top = 4.dp)) {
-//                        Text("Dismiss Error")
-//                    }
-//                }
 
                 // --- Display Event Scheduled Message ---
-//                if (eventScheduledMessage != null) {
-//                    Text(
-//                        text = eventScheduledMessage,
-//                        color = MaterialTheme.colorScheme.tertiary, // Or primary
-//                        modifier = Modifier.padding(top = 8.dp)
-//                    )
-//                    Button(
-//                        onClick = onDismissEventScheduledMessage,
-//                        modifier = Modifier.padding(top = 4.dp)
-//                    ) {
-//                        Text("OK")
-//                    }
-//                }
+                if (eventScheduledMessage != null) {
+                    Text(
+                        text = eventScheduledMessage,
+                        color = MaterialTheme.colorScheme.tertiary, // Or primary
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                    Button(
+                        onClick = onDismissEventScheduledMessage,
+                        modifier = Modifier.padding(top = 4.dp)
+                    ) {
+                        Text("OK")
+                    }
+                }
 
             } // End of Column for buttons and inputs
         } // End of Box
@@ -240,7 +304,7 @@ fun MediaUploadPage(
                 onDismissRequest = {
                     onDismissFlashcards() // This is your existing lambda to hide the dialog
                     // Optionally reset index if you want it to always start from the first card
-                    // currentFlashcardIndex = 0
+//                     currentFlashcardIndex = 0
                 },
                 title = {
                     Text("Flashcard ${currentFlashcardIndex + 1} of ${flashcards.size}")
@@ -322,26 +386,3 @@ private fun scheduleCalendarEvent(context: Context, title: String, startTimeMill
         // You might show a Toast or log an error
     }
 }
-
-//@Composable
-//fun FlashcardDisplayDialog(flashcards: List<String>, onDismiss: () -> Unit) {
-//    Dialog(onDismissRequest = onDismiss) {
-//        Card(modifier = Modifier.padding(16.dp)) {
-//            Column(modifier = Modifier.padding(16.dp)) {
-//                Text("Generated Flashcards", style = MaterialTheme.typography.headlineSmall)
-//                Spacer(modifier = Modifier.height(16.dp))
-//                LazyColumn(modifier = Modifier.heightIn(max = 400.dp)) {
-//                    items(flashcards) { cardText ->
-//                        Text(cardText, modifier = Modifier.padding(bottom = 8.dp))
-//                        Divider()
-//                    }
-//                }
-//                Spacer(modifier = Modifier.height(16.dp))
-//                Button(onClick = onDismiss, modifier = Modifier.align(Alignment.End)) {
-//                    Text("Close")
-//                }
-//            }
-//        }
-//    }
-//}
-//
