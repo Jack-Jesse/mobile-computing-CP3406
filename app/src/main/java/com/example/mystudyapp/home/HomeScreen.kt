@@ -11,12 +11,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBar
@@ -52,33 +55,8 @@ fun HomeScreen(navController: NavHostController, context: Context) {
 
     val latestEventState by eventDao.getLatestEvent().collectAsState(initial = null)
 
-    // Optional: If you want to display the status in your UI
     var studyTableEmpty by remember { mutableStateOf<Boolean?>(null) } // Null initially, then true/false
     var allEvents by remember { mutableStateOf<List<StudyEvent>>(emptyList()) }
-
-
-    // Perform the database check when the Composable is first launched
-//    LaunchedEffect(key1 = Unit) { // Re-run if studyDao instance were to change. Use Unit to run once.
-//        try {
-//            val count = eventDao.getCount() // Call your suspend fun from the DAO
-//            studyTableEmpty = count == 0
-//            if (studyTableEmpty == true) {
-//                Log.d("DatabaseCheck", "The study_table is empty.")
-//                println("DatabaseCheck: The study_table is empty.")
-//            } else {
-//                allEvents = eventDao.getAllEvents() // Fetch all events if not empty
-//                Log.d("DatabaseCheck", "The study_table is NOT empty. Count: $count")
-//                println("DatabaseCheck: The study_table is NOT empty. Count: $count")
-//            }
-//        } catch (e: Exception) {
-//            Log.e("DatabaseCheck", "Error checking if study_table is empty", e)
-//            println("DatabaseCheck: Error checking if study_table is empty: ${e.message}")
-//            studyTableEmpty = null // Indicate error or unknown state
-//        }
-//    }
-
-
-
 
     Scaffold(
         topBar = {
@@ -90,11 +68,29 @@ fun HomeScreen(navController: NavHostController, context: Context) {
             BottomAppBar(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                // FloatingActionButton for adding new events or items
-                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    FloatingActionButton(onClick = { navController.navigate(Screen.MEDIA_UPLOAD) }) {
-                        Icon(Icons.Filled.Add, "Add new study material")
+                // Settings Icon on the left
+                IconButton(onClick = { navController.navigate(Screen.SETTINGS) }) {
+                    Icon(Icons.Filled.Settings, contentDescription = "Settings")
+                }
+                // FloatingActionButton for adding new events or items in the center
+                Box(
+                    modifier = Modifier.weight(1f), // Occupy remaining space to center FAB
+                    contentAlignment = Alignment.Center
+                ) {
+                    Box(
+                        modifier = Modifier, // Let the content define the size
+                        contentAlignment = Alignment.Center // Center the FAB within this Box
+                    ) {
+                        FloatingActionButton(
+                            onClick = { navController.navigate(Screen.MEDIA_UPLOAD) }
+                        ) {
+                            Icon(Icons.Filled.Add, "Add new study material")
+                        }
                     }
+                }
+                // Profile Icon on the right
+                IconButton(onClick = { navController.navigate(Screen.PROFILE) }) {
+                    Icon(Icons.Filled.Person, contentDescription = "Profile")
                 }
             }
         }
@@ -143,46 +139,49 @@ fun HomeScreen(navController: NavHostController, context: Context) {
                             .padding(16.dp)
                             .fillMaxWidth(),
                         horizontalAlignment = Alignment.Start,
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-
 
                         Text(
                             "Latest Event", // Changed title
-                            style = AppTypography.titleLarge
+                            style = AppTypography.titleLarge,
                         )
 
                         // Get the event from the state
-                        val eventToShow = latestEventState
+//                        val eventToShow = latestEventState
+                        val eventToDisplay = latestEventState // Use the state directly
 
+                        // Log the state REGARDLESS of whether it's null or not, to see what it is
+                        Log.d("HOME_SCREEN_UI", "Current latestEventState from DAO: $eventToDisplay")
 
-
-                        if (studyTableEmpty == true || allEvents.isEmpty()) {
+                        if (eventToDisplay == null) {
+                            // This block means no latest event was found in the database by the query
+                            Log.d("HOME_SCREEN_UI", "No latest event found (eventToDisplay is null). Displaying placeholders.")
                             Text("No Upcoming Events", style = AppTypography.titleLarge)
                             Text("Your Events Go Here", style = AppTypography.titleMedium)
-                            Text("Date: 2025-10-12", style = AppTypography.titleSmall)
-                            Text("Time: 10:00 AM", style = AppTypography.displaySmall)
+                            Text("Date: 2025-10-12", style = AppTypography.titleSmall) // Example placeholder
+                            Text("Time: 10:00 AM", style = AppTypography.displaySmall) // Example placeholder
                             Text(
                                 "Click the (+) button below to start adding!",
                                 style = AppTypography.titleMedium
                             )
                         } else {
-                            // Display the details of the latest event
+                            // This block means an event object was successfully retrieved
+                            Log.d("HOME_SCREEN_UI", "Displaying event: Title='${eventToDisplay.title}', Date='${eventToDisplay.date}'")
                             Text(
-                                "Title: ${eventToShow?.title}",
+                                "Title: ${eventToDisplay.title}",
                                 style = AppTypography.titleMedium
                             )
                             Text(
-                                "Description: ${eventToShow?.description}",
+                                "Description: ${eventToDisplay.description}",
                                 style = AppTypography.bodyMedium
                             )
-                            eventToShow?.date?.let {
+                            eventToDisplay.date?.let {
                                 Text("Date: $it", style = AppTypography.bodySmall)
                             }
-                            eventToShow?.time?.let {
+                            eventToDisplay.time?.let {
                                 Text("Time: $it", style = AppTypography.bodySmall)
                             }
-                            Log.d("DatabaseCheck", "Displaying Latest Event: ${eventToShow?.title}")
                         }
                     }
                 }
@@ -190,32 +189,3 @@ fun HomeScreen(navController: NavHostController, context: Context) {
         }
     }
 }
-
-                            // Display all events using a LazyColumn
-//                            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-//                                items(allEvents.size) { index ->
-//                                    val event = allEvents[index]
-//                                    Column {
-//                                        Text("Title: ${event.title}", style = AppTypography.titleLarge)
-//
-//                                        Text(
-//                                            "Description: ${event.description}",
-//                                            style = AppTypography.titleMedium
-//                                        )
-//                                        Text("Date: ${event.date}", style = AppTypography.titleSmall)
-//                                        Text("Time: ${event.time}", style = AppTypography.displaySmall)
-//                                        println("DatabaseCheck: Title: ${event.title}")
-
-
-
-
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
-//}

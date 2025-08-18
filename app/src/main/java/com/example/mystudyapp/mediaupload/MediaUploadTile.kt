@@ -26,40 +26,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mystudyapp.flashcards.FlashcardViewModel
 
-//package com.example.mystudyapp.mediaupload
-//
-//import android.net.Uri
-//import androidx.activity.compose.rememberLauncherForActivityResult
-//import androidx.activity.result.contract.ActivityResultContracts
-//import androidx.compose.material3.Button
-//import androidx.compose.material3.Text
-//import androidx.compose.runtime.Composable
-//import androidx.compose.ui.platform.LocalContext
-//import androidx.lifecycle.viewmodel.compose.viewModel
-////import com.example.mystudyapp.flashcards.FlashcardViewModel
-//
-//// Upload PDF
-//@Composable
-////fun UploadPdfScreen(viewModel: FlashcardViewModel = viewModel()) {
-//    val context = LocalContext.current
-//
-//    val launcher = rememberLauncherForActivityResult(
-//        contract = ActivityResultContracts.OpenDocument()
-//    ) { uri: Uri? ->
-//        uri?.let {
-//            convertPdfToText(context, it)
-//
-//            // Test
-//        }
-//    }
-//
-//    Button(onClick = {
-//        launcher.launch(arrayOf("application/pdf"))
-//    }) {
-//        Text("Upload PDF")
-//    }
-//}
-
 @Composable
 fun MediaUploadScreen(viewModel: FlashcardViewModel = viewModel()) {
     val flashcards by viewModel.flashcards.collectAsState()
@@ -98,41 +64,6 @@ fun MediaUploadScreen(viewModel: FlashcardViewModel = viewModel()) {
     }
 }
 
-//@Composable
-//fun FlashcardDialog(
-//    flashcards: List<String>,
-//    onDismiss: () -> Unit
-//) {
-//    AlertDialog(
-//        onDismissRequest = onDismiss,
-//        confirmButton = {},
-//        text = {
-//            var currentIndex by remember { mutableStateOf(0) }
-//
-//            Column {
-//                Text("Flashcard ${currentIndex + 1}")
-//                Spacer(Modifier.height(10.dp))
-//                Text(flashcards[currentIndex])
-//                Spacer(Modifier.height(20.dp))
-//
-//                Row {
-//                    if (currentIndex > 0) {
-//                        Button(onClick = { currentIndex-- }) { Text("Previous") }
-//                    }
-//                    Spacer(Modifier.width(10.dp))
-//                    if (currentIndex < flashcards.size - 1) {
-//                        Button(onClick = { currentIndex++ }) { Text("Next") }
-//                    }
-//                }
-//            }
-//        },
-//        dismissButton = {
-//            TextButton(onClick = onDismiss) {
-//                Text("Close")
-//            }
-//        }
-//    )
-//}
 
 
 // testing

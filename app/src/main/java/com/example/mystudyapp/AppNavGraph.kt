@@ -4,9 +4,7 @@ package com.example.mystudyapp // ENSURE THIS PACKAGE IS THE SAME AS AppNavHost.
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.result.launch
 import androidx.annotation.RequiresApi
-import androidx.compose.runtime.Composable //Needed for the preview
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -18,43 +16,54 @@ import androidx.navigation.compose.composable
 import com.example.mystudyapp.home.HomeScreen
 import com.example.mystudyapp.mediaupload.MediaUploadPage
 import com.example.mystudyapp.mediaupload.convertPdfToTextAndGenerateFlashcards
+import com.example.mystudyapp.profile.ProfileScreen
+import com.example.mystudyapp.settings.SettingsScreen // Ensure this is the correct import for your SettingsScreen
 import com.example.mystudyapp.signin.SignInScreen // Make sure this import is correct
 
-// ... imports for your other screens like Home, MediaUpload etc. ...
 
-// THE ONLY Screen OBJECT
 object Screen {
-    const val SIGN_IN = "signIn" // <<< Double check this exact string value
+    const val SIGN_IN = "signIn"
     const val HOME = "home"
     const val PROFILE = "profile"
     const val SETTINGS = "settings"
     const val MEDIA_UPLOAD = "mediaUpload"
     const val EDIT_PROFILE = "editProfile"
-    // ... any other routes
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
-fun NavGraphBuilder.appNavGraph(navController: NavHostController) {
-    // THIS COMPOSABLE IS ESSENTIAL for the startDestination
+fun NavGraphBuilder.appNavGraph(
+    navController: NavHostController,
+    darkTheme: Boolean,
+    onThemeUpdated: () -> Unit
+) {
     composable(Screen.SIGN_IN) { // <<< Uses the Screen.SIGN_IN ("signIn") from above
         SignInScreen(navController = navController) // Your actual SignInScreen composable
     }
 
     // Other screens
     composable(Screen.HOME) {
-        // Your HomeScreen(navController)
         HomeScreen(
             navController = navController,
-            // Pass any other parameters your HomeScreen needs, e.g., context
             context = LocalContext.current
         )
     }
+
+    // Add the new route for SettingsScreen:
+    composable(Screen.SETTINGS) {
+        SettingsScreen(
+            navController = navController,
+            isDarkTheme = darkTheme,    // <--- PASS IT HERE
+            onThemeToggle = onThemeUpdated // <--- AND PASS THIS HERE
+        )    }
+
+    composable(Screen.PROFILE) {
+        ProfileScreen(navController = navController)
+    }
+
+
     composable(Screen.MEDIA_UPLOAD) {
-        // Your MediaUploadScreen(navController)
-        // === This is where we set up everything MediaUploadPage needs ===
         val context = LocalContext.current
 
-        // States that your MediaUploadPage likely needs (based on previous versions)
         var flashcards by remember { mutableStateOf<List<String>>(emptyList()) }
         var showFlashcardDialog by remember { mutableStateOf(false) }
         var isLoading by remember { mutableStateOf(false) }

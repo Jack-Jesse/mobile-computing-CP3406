@@ -10,13 +10,21 @@ import androidx.navigation.compose.rememberNavController
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AppNavHost(
-    navController: NavHostController = rememberNavController()
+    darkTheme: Boolean,
+    onThemeUpdated: () -> Unit
+
+//    navController: NavHostController = rememberNavController()
 ) {
+    val navController = rememberNavController()
     NavHost( // This is around line 23 according to your new stack trace
         navController = navController,
         startDestination = Screen.SIGN_IN // Uses Screen from AppNavGraph.kt
     ) {
         // This appNavGraph function MUST define composable(Screen.SIGN_IN) { ... }
-        appNavGraph(navController)
+        appNavGraph(
+            navController = navController,
+            darkTheme = darkTheme,          // <--- From MainActivity, through AppNavHost
+            onThemeUpdated = onThemeUpdated // <--- From MainActivity, through AppNavHost
+        )
     }
 }

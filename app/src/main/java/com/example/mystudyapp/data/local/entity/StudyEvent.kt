@@ -4,7 +4,7 @@ package com.example.mystudyapp.data.local.entity
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-@Entity(tableName = "study_events") // Optional: define a custom table name
+@Entity(tableName = "study_events")
 data class StudyEvent(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,

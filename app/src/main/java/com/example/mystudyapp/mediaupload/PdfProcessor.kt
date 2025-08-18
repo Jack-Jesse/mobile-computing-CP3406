@@ -79,38 +79,7 @@ fun convertPdfToTextAndGenerateFlashcards(
             .build()
 
 
-        // OG
-//        val pdfApiResponse = try {
-//            pdfToTextClient.newCall(pdfApiRequest).execute()
-//        } catch (e: Exception) {
-//            withContext(Dispatchers.Main) { onError("PDF Service Connection: ${e.message}") }
-//            return@launch
-//        }
-//
-//        if (!pdfApiResponse.isSuccessful) {
-//            val errorBody = pdfApiResponse.body?.string()
-//            pdfApiResponse.body?.close()
-//            withContext(Dispatchers.Main) { onError("PDF Service Error ${pdfApiResponse.code}: $errorBody") }
-//            return@launch
-//        }
-//
-//        val jsonTextFromPdfService = pdfApiResponse.body?.string()
-//        pdfApiResponse.body?.close()
-//        if (jsonTextFromPdfService == null) {
-//            withContext(Dispatchers.Main) { onError("PDF Service: Empty response.") }
-//            return@launch
-//        }
-//
-//        val gson = Gson()
-//        val pdfTextData = try {
-//            gson.fromJson(jsonTextFromPdfService, FlashcardResponseFromPdfService::class.java)
-//        } catch (e: Exception) {
-//            withContext(Dispatchers.Main) { onError("PDF Service: Bad JSON - ${e.message}") }
-//            return@launch
-//        }
 
-        // Test code
-        // ... (code for pdfMultipartBody and pdfApiRequest is ABOVE this) ...
 
         Log.d("PdfProcessor_Debug", "STAGE 1: Calling RapidAPI PDF-to-Text service...") // DEBUG Line
 
@@ -183,10 +152,6 @@ fun convertPdfToTextAndGenerateFlashcards(
 
         // --- Stage 3: Send to Gemini AI ---
         try {
-            if (com.example.mystudyapp.api.GEMINI_API_KEY == "API_KEY_HERE") {
-                withContext(Dispatchers.Main) { onError("Gemini API Key not set.") }
-                return@launch
-            }
             val responseFromGemini = geminiService.generateContent(request = geminiApiRequest)
 
             if (responseFromGemini.isSuccessful) {

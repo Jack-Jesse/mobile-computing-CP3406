@@ -8,7 +8,7 @@ class StudyRepository(private val studyEventDao: StudyEventDao) {
 
     suspend fun createEvent(event: StudyEvent): Result<Unit> {
         return try {
-            val id = studyEventDao.insert(event) // Called on the injected DAO instance
+            val id = studyEventDao.insertStudyEvent(event) // Called on the injected DAO instance
             Result.success(id)
         } catch (e: Exception) {
             Result.failure(e)

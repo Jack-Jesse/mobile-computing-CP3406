@@ -5,7 +5,9 @@ import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.launch
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,7 +29,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -45,6 +51,8 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DisplayMode
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.material3.rememberTimePickerState
@@ -71,6 +79,9 @@ import androidx.navigation.NavHostController
 import com.example.mystudyapp.R
 import com.example.mystudyapp.Screen
 import com.example.mystudyapp.data.local.database.AppDatabase
+import com.example.mystudyapp.data.local.entity.StudyEvent
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -95,6 +106,9 @@ fun MediaUploadPage(
     onDismissEventScheduledMessage: () -> Unit
 ) {
     val context = LocalContext.current
+    val dao = AppDatabase.getDatabase(context).studyEventDao() // <<< MUST MATCH HomeScreen's DB
+    val coroutineScope = rememberCoroutineScope() // To launch suspend functions
+
     var currentFlashcardIndex by remember { mutableStateOf(0) }
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
@@ -105,17 +119,43 @@ fun MediaUploadPage(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Upload & Process Media") },
+                title = { Text("Media Upload") },
                 navigationIcon = {
-                     IconButton(onClick = { navController.navigateUp() }) { // <-- Back button
-                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary
-                )
+                    TextButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                }
             )
+        },
+        bottomBar = {
+            BottomAppBar(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                // Settings Icon on the left
+                IconButton(onClick = { navController.navigate(Screen.SETTINGS) }) {
+                    Icon(Icons.Filled.Settings, contentDescription = "Settings")
+                }
+                // FloatingActionButton for adding new events or items in the center
+                Box(
+                    modifier = Modifier.weight(1f), // Occupy remaining space to center FAB
+                    contentAlignment = Alignment.Center
+                ) {
+                    Box(
+                        modifier = Modifier, // Let the content define the size
+                        contentAlignment = Alignment.Center // Center the FAB within this Box
+                    ) {
+                        FloatingActionButton(
+                            onClick = { navController.navigate(Screen.MEDIA_UPLOAD) }
+                        ) {
+                            Icon(Icons.Filled.Add, "Add new study material")
+                        }
+                    }
+                }
+                // Profile Icon on the right
+                IconButton(onClick = { navController.navigate(Screen.PROFILE) }) {
+                    Icon(Icons.Filled.Person, contentDescription = "Profile")
+                }
+            }
         }
     ) { innerPadding ->
         Box( // Use Box to center the Column
@@ -224,6 +264,7 @@ fun MediaUploadPage(
                 // --- Date Picker Dialog ---
                 if (showDatePicker) {
                     val datePickerState = rememberDatePickerState()
+
                     AlertDialog(
                         onDismissRequest = { showDatePicker = false },
                         title = { Text("Select Event Date") },
@@ -269,6 +310,35 @@ fun MediaUploadPage(
                                     set(Calendar.HOUR_OF_DAY, timePickerState.hour)
                                     set(Calendar.MINUTE, timePickerState.minute)
                                 }
+
+                                val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                                val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault()) // Or "hh:mm a" for AM/PM
+
+                                val eventToSave = StudyEvent(
+                                    title = tempEventName,
+                                    description = tempEventDescription,
+                                    date = dateFormat.format(calendar.time),
+                                    time = timeFormat.format(calendar.time)
+                                )
+
+
+                                coroutineScope.launch {
+                                    try {
+                                        dao.insertStudyEvent(eventToSave)
+                                        Log.d("DB_INSERT", "Event insertion successful: ${eventToSave.title}")
+                                        onEventScheduled("Event '${eventToSave.title}' scheduled successfully!")
+                                        // Reset states or navigate away
+                                        showTimePicker = false
+                                        // tempEventNameForDb = "" // etc., if you want to clear after successful save
+                                        // selectedDateMillisForDb = null
+                                    } catch (e: Exception) {
+                                        onEventScheduled("Failed to schedule event. Error: ${e.message}")
+                                    }
+                                }
+
+
+
+
                                 val finalEventTimeMillis = calendar.timeInMillis
                                 val eventTitle = eventName.ifBlank { "Flashcards Study Session" }
                                 val eventDesc = tempEventDescription.ifBlank { "Create more flashcards from a PDF." }
