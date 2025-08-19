@@ -21,7 +21,7 @@ StudyTok is built using modern Android development technologies:
 *   **User Interface:** Jetpack Compose for a modern, declarative UI
 *   **Networking:** Retrofit for efficient API communication
 *   **Local Data Storage:** Room Persistence Library for managing local data like flashcards and schedules
-*   _(You can add other significant libraries here, e.g., for PDF viewing, calendar integration, etc.)_
+*   Gemini Ai API and PDF-to-text API from RapidAPI
 
 ## Setup and Installation
 
