@@ -1,4 +1,3 @@
-// File: app/src/main/java/com/example/mystudyapp/api/model/GeminiModels.kt
 package com.example.mystudyapp.api.model
 
 // --- Request to Gemini ---

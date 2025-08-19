@@ -23,12 +23,4 @@ class StudyRepository(private val studyEventDao: StudyEventDao) {
             Result.failure(e)
         }
     }
-
-//    suspend fun insertEvent(event: StudyEvent) {
-//        // Add a println here
-//        println("Repository: Inserting event: ${event.title}")
-//        eventDao.insert(event)
-//    }
-
-
 }

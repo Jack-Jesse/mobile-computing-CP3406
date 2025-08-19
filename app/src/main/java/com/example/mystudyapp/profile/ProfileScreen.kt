@@ -80,6 +80,7 @@ fun ProfileScreen(navController: NavController) {
                 IconButton(onClick = { navController.navigate(Screen.SETTINGS) }) {
                     Icon(Icons.Filled.Settings, contentDescription = "Settings")
                 }
+
                 // FloatingActionButton for adding new events or items in the center
                 Box(
                     modifier = Modifier.weight(1f), // Occupy remaining space to center FAB
@@ -107,7 +108,7 @@ fun ProfileScreen(navController: NavController) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(all = 16.dp), // Changed to 16.dp as a common practice
+                .padding(all = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {

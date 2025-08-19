@@ -1,6 +1,5 @@
-package com.example.mystudyapp // ENSURE THIS PACKAGE IS THE SAME AS AppNavHost.kt
+package com.example.mystudyapp
 
-// ... other necessary imports ...
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -17,8 +16,8 @@ import com.example.mystudyapp.home.HomeScreen
 import com.example.mystudyapp.mediaupload.MediaUploadPage
 import com.example.mystudyapp.mediaupload.convertPdfToTextAndGenerateFlashcards
 import com.example.mystudyapp.profile.ProfileScreen
-import com.example.mystudyapp.settings.SettingsScreen // Ensure this is the correct import for your SettingsScreen
-import com.example.mystudyapp.signin.SignInScreen // Make sure this import is correct
+import com.example.mystudyapp.settings.SettingsScreen
+import com.example.mystudyapp.signin.SignInScreen
 
 
 object Screen {
@@ -27,7 +26,6 @@ object Screen {
     const val PROFILE = "profile"
     const val SETTINGS = "settings"
     const val MEDIA_UPLOAD = "mediaUpload"
-    const val EDIT_PROFILE = "editProfile"
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -36,8 +34,8 @@ fun NavGraphBuilder.appNavGraph(
     darkTheme: Boolean,
     onThemeUpdated: () -> Unit
 ) {
-    composable(Screen.SIGN_IN) { // <<< Uses the Screen.SIGN_IN ("signIn") from above
-        SignInScreen(navController = navController) // Your actual SignInScreen composable
+    composable(Screen.SIGN_IN) {
+        SignInScreen(navController = navController)
     }
 
     // Other screens
@@ -48,12 +46,12 @@ fun NavGraphBuilder.appNavGraph(
         )
     }
 
-    // Add the new route for SettingsScreen:
+    // Add new route for SettingsScreen:
     composable(Screen.SETTINGS) {
         SettingsScreen(
             navController = navController,
-            isDarkTheme = darkTheme,    // <--- PASS IT HERE
-            onThemeToggle = onThemeUpdated // <--- AND PASS THIS HERE
+            isDarkTheme = darkTheme,
+            onThemeToggle = onThemeUpdated
         )    }
 
     composable(Screen.PROFILE) {
@@ -67,7 +65,6 @@ fun NavGraphBuilder.appNavGraph(
         var flashcards by remember { mutableStateOf<List<String>>(emptyList()) }
         var showFlashcardDialog by remember { mutableStateOf(false) }
         var isLoading by remember { mutableStateOf(false) }
-        var errorMessage by remember { mutableStateOf<String?>(null) }
         var eventScheduledMessage by remember { mutableStateOf<String?>(null) }
         var eventName by remember { mutableStateOf("") }
 
@@ -78,7 +75,6 @@ fun NavGraphBuilder.appNavGraph(
         ) { uri ->
             if (uri != null) {
                 isLoading = true
-                errorMessage = null
                 eventScheduledMessage = null
                 convertPdfToTextAndGenerateFlashcards(
                     context = context,
@@ -87,21 +83,18 @@ fun NavGraphBuilder.appNavGraph(
                         isLoading = false
                         if (generatedFlashcards.isNotEmpty()) {
                             flashcards = generatedFlashcards
-//                            currentFlashcardIndex = 0 // RESET HERE
                             showFlashcardDialog = true
-                        } else {                            errorMessage = "No flashcards could be generated from the PDF."
                         }
                     },
                     onError = { errorMsg ->
                         isLoading = false
-                        errorMessage = errorMsg
                     }
                 )
             }
         }
 
 
-        // This is the call to MediaUploadPage, around line 103 in your file
+        // call to MediaUploadPage
         MediaUploadPage(
             navController = navController,
             onPickUploadMedia = {
@@ -110,9 +103,7 @@ fun NavGraphBuilder.appNavGraph(
             flashcards = flashcards,
             showFlashcardDialog = showFlashcardDialog,
             isLoading = isLoading,
-            errorMessage = errorMessage,
             onDismissFlashcards = { showFlashcardDialog = false },
-            onDismissError = { errorMessage = null },
 
             eventName = eventName,
             onEventNameChanged = { newName ->

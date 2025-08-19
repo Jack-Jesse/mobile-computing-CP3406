@@ -40,7 +40,7 @@ fun convertPdfToTextAndGenerateFlashcards(
     val contentResolver = context.contentResolver
 
     CoroutineScope(Dispatchers.IO).launch {
-        // --- Stage 1: Get text from the PDF ---
+        // Get text from the PDF
         val inputStream = contentResolver.openInputStream(fileUri)
         val fileBytes = try {
             inputStream?.readBytes()
@@ -50,7 +50,7 @@ fun convertPdfToTextAndGenerateFlashcards(
         } finally {
             try {
                 inputStream?.close()
-            } catch (e: Exception) { /* Ignored */ }
+            } catch (e: Exception) {println(e.message)}
         }
 
         if (fileBytes == null) {
@@ -64,12 +64,7 @@ fun convertPdfToTextAndGenerateFlashcards(
             .addFormDataPart("file", "document.pdf", fileRequestBody)
             .build()
 
-        // TODO: IMPORTANT! Replace with your RapidAPI key for PDF-to-Text service
         val pdfRapidApiKey = "986e213179msh2533c7af66dbb7ep1de88fjsn0e408c264928"
-        if (pdfRapidApiKey == "API_KEY_HERE") {
-            withContext(Dispatchers.Main) { onError("PDF Converter API Key not set.") }
-            return@launch
-        }
 
         val pdfApiRequest = Request.Builder()
             .url("https://pdf-converter-api.p.rapidapi.com/PdfToText?startPage=0&endPage=0")
@@ -105,7 +100,6 @@ fun convertPdfToTextAndGenerateFlashcards(
         Log.d("PdfProcessor_Debug", "STAGE 1: Raw RapidAPI Response Body: $responseBodyString") // DEBUG Line
 
         if (!pdfApiResponse.isSuccessful) {
-            // pdfApiResponse.body?.close() // Body already consumed or closed
             withContext(Dispatchers.Main) { onError("PDF Service Error ${pdfApiResponse.code}: $responseBodyString") }
             return@launch
         }
@@ -136,7 +130,7 @@ fun convertPdfToTextAndGenerateFlashcards(
             return@launch
         }
 
-        // --- Stage 2: Prepare prompt for Gemini AI ---
+        // Prepare prompt for Gemini AI
         val promptForGemini = """
             Create study flashcards from the following text.
             For each flashcard, provide "Q:" with a question/term, and "A:" with the answer/definition.
@@ -150,7 +144,7 @@ fun convertPdfToTextAndGenerateFlashcards(
         val geminiContent = GeminiContent(parts = listOf(geminiPart))
         val geminiApiRequest = GeminiRequest(contents = listOf(geminiContent))
 
-        // --- Stage 3: Send to Gemini AI ---
+        // Send to Gemini AI
         try {
             val responseFromGemini = geminiService.generateContent(request = geminiApiRequest)
 

@@ -1,13 +1,9 @@
 package com.example.mystudyapp.mediaupload
 
-import FlashcardDialog
-import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.util.Log
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.launch
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,13 +15,9 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -36,29 +28,23 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DisplayMode
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.material3.rememberTimePickerState
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -68,20 +54,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.em
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.mystudyapp.R
 import com.example.mystudyapp.Screen
 import com.example.mystudyapp.data.local.database.AppDatabase
 import com.example.mystudyapp.data.local.entity.StudyEvent
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -97,9 +77,9 @@ fun MediaUploadPage(
     flashcards: List<String>,
     showFlashcardDialog: Boolean,
     isLoading: Boolean,
-    errorMessage: String?,
+//    errorMessage: String?,
     onDismissFlashcards: () -> Unit,
-    onDismissError: () -> Unit,
+//    onDismissError: () -> Unit,
     eventName: String,
     onEventNameChanged: (String) -> Unit,
     onEventScheduled: (String) -> Unit,
@@ -110,7 +90,7 @@ fun MediaUploadPage(
     val dao = AppDatabase.getDatabase(context).studyEventDao() // <<< MUST MATCH HomeScreen's DB
     val coroutineScope = rememberCoroutineScope() // To launch suspend functions
 
-    var currentFlashcardIndex by remember { mutableStateOf(0) }
+    var currentFlashcardIndex by remember { mutableIntStateOf(0) }
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
     var showEventNameDialog by remember { mutableStateOf(false) }
@@ -216,14 +196,13 @@ fun MediaUploadPage(
                     onClick = {
                         showEventNameDialog = true
                     },
-//                    enabled = !isLoading && flashcards.isNotEmpty(), // Enable if not loading AND flashcards are ready
 
                     modifier = Modifier.fillMaxWidth(0.8f)
                 ) {
                     Text("Schedule Study Event")
                 }
 
-                // --- Dialog to Enter Event Name and Description ---
+                // Dialog to Enter Event Name and Description
                 if (showEventNameDialog) {
                     AlertDialog(
                         onDismissRequest = { showEventNameDialog = false },
@@ -247,14 +226,15 @@ fun MediaUploadPage(
                         },
                         confirmButton = {
                             Button(onClick = {
-                                onEventNameChanged(tempEventName) // Update the actual eventName
+                                onEventNameChanged(tempEventName) // Update eventName
+
                                 // Proceed to date picker
                                 showEventNameDialog = false
                                 showDatePicker = true
 
-                                // Prepare for scheduling (message and potentially actual scheduling logic)
+                                // Prepare for scheduling
                                 val eventTitle = tempEventName.ifBlank { "Study Session" }
-                                val effectiveDescription = tempEventDescription.ifBlank { "Review flashcards generated from the PDF." }
+//                                val effectiveDescription = tempEventDescription.ifBlank { "Review flashcards generated from the PDF." }
 
                                 if (eventTitle.isNotBlank()) {
                                     onEventScheduled("Event '$eventTitle' details captured. Please select date and time.")
@@ -279,13 +259,9 @@ fun MediaUploadPage(
                         confirmButton = {
                             Button(onClick = {
                                 datePickerState.selectedDateMillis?.let { millis ->
-                                    // Store the selected date or pass it along
-                                    // For now, just proceed to time picker
                                     showDatePicker = false // Close date picker
                                     showTimePicker = true // Open time picker
                                 } ?: run {
-                                    // Handle case where no date is selected if necessary
-                                    // For example, show a toast or a message
                                     onEventScheduled("Please select a date.")
                                 }
                             }) { Text("Confirm") }
@@ -301,19 +277,12 @@ fun MediaUploadPage(
                         onDismissRequest = { showTimePicker = false },
                         title = { Text("Select Event Time") },
                         text = {
-                            // Corrected usage of TimePicker - Wrap in a Composable if needed or ensure it's placed directly
-                            // For now, let's assume TimePicker is a direct composable child here.
-                            // If TimePicker itself needs a specific layout, adjust accordingly.
                             androidx.compose.material3.TimePicker(state = timePickerState)
                                },
                         confirmButton = {
                             Button(onClick = {
                                 showTimePicker = false
-                                // Combine date and time (you'll need the selected date from the date picker)
-                                // And then call the actual scheduling logic
-//                                val selectedDateMillis = datePickerState.selectedDateMillis ?: Calendar.getInstance().timeInMillis // Fallback to now if null
                                 val calendar = Calendar.getInstance().apply {
-//                                    timeInMillis = selectedDateMillis
                                     set(Calendar.HOUR_OF_DAY, timePickerState.hour)
                                     set(Calendar.MINUTE, timePickerState.minute)
                                 }
@@ -334,10 +303,7 @@ fun MediaUploadPage(
                                         dao.insertStudyEvent(eventToSave)
                                         Log.d("DB_INSERT", "Event insertion successful: ${eventToSave.title}")
                                         onEventScheduled("Event '${eventToSave.title}' scheduled successfully!")
-                                        // Reset states or navigate away
                                         showTimePicker = false
-                                        // tempEventNameForDb = "" // etc., if you want to clear after successful save
-                                        // selectedDateMillisForDb = null
                                     } catch (e: Exception) {
                                         onEventScheduled("Failed to schedule event. Error: ${e.message}")
                                     }
@@ -371,17 +337,14 @@ fun MediaUploadPage(
                         Text("OK")
                     }
                 }
-
-            } // End of Column for buttons and inputs
-        } // End of Box
+            }
+        }
 
         // --- Dialog to Show Flashcards ---
         if (showFlashcardDialog && flashcards.isNotEmpty()) {
             AlertDialog(
                 onDismissRequest = {
-                    onDismissFlashcards() // This is your existing lambda to hide the dialog
-                    // Optionally reset index if you want it to always start from the first card
-//                     currentFlashcardIndex = 0
+                    onDismissFlashcards()
                 },
                 title = {
                     Text("Flashcard ${currentFlashcardIndex + 1} of ${flashcards.size}")
@@ -391,7 +354,7 @@ fun MediaUploadPage(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .defaultMinSize(minHeight = 150.dp), // Give it some minimum height
+                            .defaultMinSize(minHeight = 150.dp), // Give minimum height
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
@@ -450,7 +413,6 @@ private fun scheduleCalendarEvent(context: Context, title: String, startTimeMill
         data = android.provider.CalendarContract.Events.CONTENT_URI
         putExtra(android.provider.CalendarContract.Events.TITLE, title.ifBlank { "Study Session" })
         putExtra(android.provider.CalendarContract.EXTRA_EVENT_BEGIN_TIME, startTimeMillis)
-        // You can set an end time as well, e.g., startTimeMillis + one hour
         val endTimeMillis = startTimeMillis + (60 * 60 * 1000) // 1 hour later
         putExtra(android.provider.CalendarContract.EXTRA_EVENT_END_TIME, endTimeMillis)
         putExtra(android.provider.CalendarContract.Events.DESCRIPTION, description)
@@ -458,8 +420,5 @@ private fun scheduleCalendarEvent(context: Context, title: String, startTimeMill
     }
     if (intent.resolveActivity(context.packageManager) != null) {
         context.startActivity(intent)
-    } else {
-        // Handle the case where no calendar app is available
-        // You might show a Toast or log an error
     }
 }

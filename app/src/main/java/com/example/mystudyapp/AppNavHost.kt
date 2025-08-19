@@ -3,7 +3,6 @@ package com.example.mystudyapp
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 
@@ -13,18 +12,17 @@ fun AppNavHost(
     darkTheme: Boolean,
     onThemeUpdated: () -> Unit
 
-//    navController: NavHostController = rememberNavController()
 ) {
     val navController = rememberNavController()
-    NavHost( // This is around line 23 according to your new stack trace
+    NavHost(
         navController = navController,
-        startDestination = Screen.SIGN_IN // Uses Screen from AppNavGraph.kt
+        startDestination = Screen.SIGN_IN
     ) {
-        // This appNavGraph function MUST define composable(Screen.SIGN_IN) { ... }
+
         appNavGraph(
             navController = navController,
-            darkTheme = darkTheme,          // <--- From MainActivity, through AppNavHost
-            onThemeUpdated = onThemeUpdated // <--- From MainActivity, through AppNavHost
+            darkTheme = darkTheme,
+            onThemeUpdated = onThemeUpdated
         )
     }
 }

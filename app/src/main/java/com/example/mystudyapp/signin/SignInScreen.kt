@@ -11,29 +11,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
 import com.example.mystudyapp.data.local.UserDataStore.Companion.USERNAME_KEY
 import com.example.mystudyapp.data.local.dataStore
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.map
-import kotlin.math.log
-
-
-val USERNAME_KEY = stringPreferencesKey("username")
-val Context.dataStore by preferencesDataStore(name = "user_prefs")
-
-
 
 fun saveUsername(context: Context, username: String) {
     CoroutineScope(Dispatchers.IO).launch {
@@ -55,7 +44,6 @@ fun getUsername(context: Context) = context.dataStore.data
 
 @Composable
 fun SignInScreen(navController: NavHostController) {
-    val scope = rememberCoroutineScope()
 
     Box(
         modifier = Modifier.fillMaxSize(),

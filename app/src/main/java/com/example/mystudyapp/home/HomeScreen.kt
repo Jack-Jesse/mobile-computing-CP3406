@@ -148,14 +148,13 @@ fun HomeScreen(navController: NavHostController, context: Context) {
                         )
 
                         // Get the event from the state
-//                        val eventToShow = latestEventState
-                        val eventToDisplay = latestEventState // Use the state directly
+                        val eventToDisplay = latestEventState
 
                         // Log the state REGARDLESS of whether it's null or not, to see what it is
                         Log.d("HOME_SCREEN_UI", "Current latestEventState from DAO: $eventToDisplay")
 
                         if (eventToDisplay == null) {
-                            // This block means no latest event was found in the database by the query
+                            // Log that no latest event was found in the database by the query
                             Log.d("HOME_SCREEN_UI", "No latest event found (eventToDisplay is null). Displaying placeholders.")
                             Text("No Upcoming Events", style = AppTypography.titleLarge)
                             Text("Your Events Go Here", style = AppTypography.titleMedium)
@@ -166,7 +165,7 @@ fun HomeScreen(navController: NavHostController, context: Context) {
                                 style = AppTypography.titleMedium
                             )
                         } else {
-                            // This block means an event object was successfully retrieved
+                            // Event object was successfully retrieved
                             Log.d("HOME_SCREEN_UI", "Displaying event: Title='${eventToDisplay.title}', Date='${eventToDisplay.date}'")
                             Text(
                                 "Title: ${eventToDisplay.title}",

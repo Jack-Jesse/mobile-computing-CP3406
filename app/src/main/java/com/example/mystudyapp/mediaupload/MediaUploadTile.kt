@@ -1,3 +1,5 @@
+package com.example.mystudyapp.mediaupload
+
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -44,9 +46,6 @@ fun MediaUploadScreen(viewModel: FlashcardViewModel = viewModel()) {
     Column {
         Button(onClick = {
             filePickerLauncher.launch("application/pdf")
-
-//            val uri =  // use file picker launcher result
-//            viewModel.processPdf(context, uri)
         }) {
             Text("Upload PDF")
         }
